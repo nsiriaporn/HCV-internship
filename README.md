@@ -28,4 +28,19 @@ probability_dept$probability <- round(dept.traj.RNA$positive/dept.traj$total, di
 #view the probability for the given department
 probability_dept$probability[which(probability_dept$departments==20)]
 
-# create data frame where it shows patients and procedures done
+#### create data frame where it shows patients and procedures done ####
+
+# number of IV cath done for patient 1
+sum(proc_analysis$INTRAVENOUS[which(proc_analysis$ID_PATIENT==1)], na.rm = TRUE)
+
+# procedures for patient 1
+colSums(proc_analysis[which(proc_analysis$ID_PATIENT==1), c(4:17)], na.rm = TRUE)
+
+# departments for patient 1 and IV cath
+print(proc_analysis$DEPARTMENT[which(proc_analysis$ID_PATIENT==1 & proc_analysis$INTRAVENOUS==1)])
+
+# procedure ID for IV cath in patient 1
+print(proc_analysis$ID_PATIENTINVASIVEPROC[which(proc_analysis$ID_PATIENT==1 & proc_analysis$INTRAVENOUS==1)])
+
+# department for procedure ID = 1
+proc_analysis$DEPARTMENT[which(proc_analysis$ID_PATIENTINVASIVEPROC==1)]
