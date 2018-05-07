@@ -74,17 +74,35 @@ View(proc_analysis[which(proc_analysis$ID_PATIENT==4),])
 
 #### create data frame where it shows patients and procedures done ####
 
-# number of IV cath done for patient 1
-sum(proc_analysis$INTRAVENOUS[which(proc_analysis$ID_PATIENT==1)], na.rm = TRUE)
+# number of IV cath done for patient 4
+sum(proc_analysis$INTRAVENOUS[which(proc_analysis$ID_PATIENT==4)], na.rm = TRUE)
 
-# procedures for patient 1
-colSums(proc_analysis[which(proc_analysis$ID_PATIENT==1), c(4:17)], na.rm = TRUE)
+# procedures for patient 4
+colSums(proc_analysis[which(proc_analysis$ID_PATIENT==4), c(4:17)], na.rm = TRUE)
 
-# departments for patient 1 and IV cath
-print(proc_analysis$DEPARTMENT[which(proc_analysis$ID_PATIENT==1 & proc_analysis$INTRAVENOUS==1)])
+# departments for patient 4 
+proc_analysis$DEPARTMENT[which(proc_analysis$ID_PATIENT==4)]
 
-# procedure ID for IV cath in patient 1
-print(proc_analysis$ID_PATIENTINVASIVEPROC[which(proc_analysis$ID_PATIENT==1 & proc_analysis$INTRAVENOUS==1)])
+# departments for patient 4 and IV cath
+print(proc_analysis$DEPARTMENT[which(proc_analysis$ID_PATIENT==4 & proc_analysis$INTRAVENOUS==1)])
 
-# department for procedure ID = 1
-proc_analysis$DEPARTMENT[which(proc_analysis$ID_PATIENTINVASIVEPROC==1)]
+# procedure ID for IV cath in patient 4
+print(proc_analysis$ID_PATIENTINVASIVEPROC[which(proc_analysis$ID_PATIENT==4 & proc_analysis$INTRAVENOUS==1)])
+
+# department for procedure ID = 39
+proc_analysis$DEPARTMENT[which(proc_analysis$ID_PATIENTINVASIVEPROC==39)]
+
+# merge patient_proc with prevalence
+patient_dept_prev <- merge(patients_proc, prevalence_dept, by="DEPARTMENT")
+
+# department prevalence for patient 4
+patient_dept_prev$prevalence[which(patient_dept_prev$ID_PATIENT==4)]
+
+## melting patient with procedures
+patient_procedures <- Patient.Invasive.Procedure[, c("ID_PATIENT", "INTRAVENOUS",
+                                                "SUTURES", "BLOOD_TRANSFUSION", "BLOOD_SAMPLE", "INJECTION",
+                                                "ENDOSCOPY", "GASTRIC_LAVAGE", "IUD_INSERTION", "CARDIAC_CATHETER",
+                                                "DIALYSIS", "WOUND_DRESSING", "BLOODGLUCOSE", "ENDOTRACHEALINTU",
+                                                "DRAINAGECATHETER")]
+library(reshape2)
+mpatient_procedures <- melt(patient_procedures, id=c("ID_PATIENT"), na.rm = T)
