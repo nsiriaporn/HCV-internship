@@ -22,11 +22,11 @@ proc_analysis <- Patient.Invasive.Procedure[, c("ID_PATIENTINVASIVEPROC", "ID_PA
 View(proc_analysis[which(proc_analysis$ID_PATIENT==4),])
 
 # data frame with departments and HCV RNA prevalence
-probability_dept <- data.frame(names(table(Trajectory_HCV_S$DEPARTMENT)))
-names(probability_dept) <- c("departments")
-probability_dept$probability <- round(dept.traj.RNA$positive/dept.traj$total, digits = 4)
+prevalence_dept <- data.frame(names(table(Trajectory_HCV_S$DEPARTMENT)))
+names(prevalence_dept) <- c("departments")
+prevalence_dept$prevalence <- round(dept.traj.RNA$positive/dept.traj$total, digits = 4)
 #view the probability for the given department
-probability_dept$probability[which(probability_dept$departments==20)]
+prevalence_dept$prevalence[which(prevalence_dept$departments==20)]
 
 
 #### per-procedure risk df ####
