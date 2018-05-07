@@ -28,6 +28,50 @@ probability_dept$probability <- round(dept.traj.RNA$positive/dept.traj$total, di
 #view the probability for the given department
 probability_dept$probability[which(probability_dept$departments==20)]
 
+
+#### per-procedure risk df ####
+pp_risk <- c("endoscopy", "endotracheal intubation", "hemodialysis", "injection", "blood glucose",
+             "stitches", "blood sample", "IV catheter", "blood transfusion", "drainage catheter",
+             "cardiac catheter", "gastric lavage", "wound dressing")
+pp_transmission <- c(1.727,1.727,1.970,2.200,2.200,2.302,2.500,2.864,3.414,3.579,
+                     4.063,6.937,10.009)
+pp_transmission <- pp_transmission/100
+
+pp_lowsensitivity <- c(0.785,0.785,0.868,1.000,1.000,1.046,1.136,1.302,1.552,1.627,
+                       1.847,3.153,4.550)
+pp_lowsensitivity <- pp_lowsensitivity/100
+
+pp_highsensitivity <- c(7.223,7.223,7.986,9.200,9.200,9.627,10.455,11.977,14.277,
+                        14.969,16.991,29.009,41.856)
+pp_highsensitivity <- pp_highsensitivity/100
+
+pp_risk_df <- data.frame(pp_risk, pp_transmission, pp_lowsensitivity, pp_highsensitivity)
+
+# 1 - (dept prev * per-procedure)
+1-(prevalence_dept$prevalence[which(prevalence_dept$departments==-1)])*(pp_risk_df$pp_transmission[which(pp_risk_df$pp_risk=="IV catheter")])
+#### risk for patient 4 ####
+View(proc_analysis[which(proc_analysis$ID_PATIENT==4),])
+1-(1-(prevalence_dept$prevalence[which(prevalence_dept$departments==-1)])*(pp_risk_df$pp_transmission[which(pp_risk_df$pp_risk=="IV catheter")]))*
+  (1-(prevalence_dept$prevalence[which(prevalence_dept$departments==19)])*(pp_risk_df$pp_transmission[which(pp_risk_df$pp_risk=="blood sample")]))*
+  (1-(prevalence_dept$prevalence[which(prevalence_dept$departments==18)])*(pp_risk_df$pp_transmission[which(pp_risk_df$pp_risk=="IV catheter")]))*
+  (1-(prevalence_dept$prevalence[which(prevalence_dept$departments==1)])*(pp_risk_df$pp_transmission[which(pp_risk_df$pp_risk=="endoscopy")]))
+#0.011657 = 1.166%
+
+#sensitivity analysis 1%
+1-(1-(prevalence_dept$prevalence[which(prevalence_dept$departments==-1)])*(pp_risk_df$pp_lowsensitivity[which(pp_risk_df$pp_risk=="IV catheter")]))*
+  (1-(prevalence_dept$prevalence[which(prevalence_dept$departments==19)])*(pp_risk_df$pp_lowsensitivity[which(pp_risk_df$pp_risk=="blood sample")]))*
+  (1-(prevalence_dept$prevalence[which(prevalence_dept$departments==18)])*(pp_risk_df$pp_lowsensitivity[which(pp_risk_df$pp_risk=="IV catheter")]))*
+  (1-(prevalence_dept$prevalence[which(prevalence_dept$departments==1)])*(pp_risk_df$pp_lowsensitivity[which(pp_risk_df$pp_risk=="endoscopy")]))
+#0.00527 = 0.527%
+
+#sensitivity analysis 9.2%
+1-(1-(prevalence_dept$prevalence[which(prevalence_dept$departments==-1)])*(pp_risk_df$pp_highsensitivity[which(pp_risk_df$pp_risk=="IV catheter")]))*
+  (1-(prevalence_dept$prevalence[which(prevalence_dept$departments==19)])*(pp_risk_df$pp_highsensitivity[which(pp_risk_df$pp_risk=="blood sample")]))*
+  (1-(prevalence_dept$prevalence[which(prevalence_dept$departments==18)])*(pp_risk_df$pp_highsensitivity[which(pp_risk_df$pp_risk=="IV catheter")]))*
+  (1-(prevalence_dept$prevalence[which(prevalence_dept$departments==1)])*(pp_risk_df$pp_highsensitivity[which(pp_risk_df$pp_risk=="endoscopy")]))
+#0.04781 = 4.781%
+
+
 #### create data frame where it shows patients and procedures done ####
 
 # number of IV cath done for patient 1
