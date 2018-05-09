@@ -106,3 +106,45 @@ patient_procedures <- Patient.Invasive.Procedure[, c("ID_PATIENT", "INTRAVENOUS"
                                                 "DRAINAGECATHETER")]
 library(reshape2)
 mpatient_procedures <- melt(patient_procedures, id=c("ID_PATIENT"), na.rm = T)
+colnames(pp_risk_df)[1] <- "procedures"
+colnames(mpatient_procedures)[3] <- "procedures"
+mpatient_procedures <- merge(mpatient_procedures, pp_risk_df, by="procedures")
+
+#delete value column in mpatient_procedure
+mpatient_procedures$value <- NULL
+
+#merge departments and prevalence into df
+procID_dept <- Patient.Invasive.Procedure[, c("ID_PATIENTINVASIVEPROC", "DEPARTMENT")] #df with just procedure ID and dept
+mpatient_procedures <- merge(mpatient_procedures, procID_dept, by="ID_PATIENTINVASIVEPROC")
+mpatient_procedures <- merge(mpatient_procedures, prevalence_dept, by="DEPARTMENT")
+
+#reorder columns
+mpatient_procedures <- mpatient_procedures[,c(2,4,3,5,6,7,1,8)]
+
+#### create function for formula ####
+riskassessment <- function(x,y){
+  product = 1-(x*y)
+  probability = prod(product, na.rm = T)
+  risk = 1-probability
+  return(risk)
+}
+  
+#risk assessement for patient 4
+riskassessment(mpatient_procedures$pp_transmission[which(mpatient_procedures$ID_PATIENT==4)],mpatient_procedures$prevalence[which(mpatient_procedures$ID_PATIENT==4)])
+#probablity = 0.01157024
+
+
+#### Loop for risk analysis and sensitivity analysis ####
+patients <- names(table(Patient.Invasive.Procedure$ID_PATIENT))
+patient_risk <- data.frame(NULL)
+for(i in 1:length(patients)){
+  patient_risk[i, "ID Patient"] <- patients[i]
+  patient_risk[i, "risk"] <- riskassessment(mpatient_procedures$pp_transmission[which(mpatient_procedures$ID_PATIENT==i)],mpatient_procedures$prevalence[which(mpatient_procedures$ID_PATIENT==i)])
+  patient_risk[i, "sensitivity low"] <- riskassessment(mpatient_procedures$pp_lowsensitivity[which(mpatient_procedures$ID_PATIENT==i)],mpatient_procedures$prevalence[which(mpatient_procedures$ID_PATIENT==i)])
+  patient_risk[i, "sensitivity high"] <- riskassessment(mpatient_procedures$pp_highsensitivity[which(mpatient_procedures$ID_PATIENT==i)],mpatient_procedures$prevalence[which(mpatient_procedures$ID_PATIENT==i)])
+}
+
+patient_risk <- patient_risk[,c(4,1,2,3)]
+
+# for some reason 502 doesn't work on table
+riskassessment(mpatient_procedures$pp_transmission[which(mpatient_procedures$ID_PATIENT==502)],mpatient_procedures$prevalence[which(mpatient_procedures$ID_PATIENT==502)])
