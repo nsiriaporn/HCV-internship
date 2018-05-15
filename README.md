@@ -21,7 +21,10 @@ proc_analysis <- Patient.Invasive.Procedure[, c("ID_PATIENTINVASIVEPROC", "ID_PA
                                                 "DRAINAGECATHETER", "OTHER_INVPROC")]
 View(proc_analysis[which(proc_analysis$ID_PATIENT==4),])
 
-# data frame with departments and HCV RNA prevalence
+# average procedures per patient
+mean(collapsed_proc$counts)
+
+#### departments and HCV RNA prevalence df ####
 prevalence_dept <- data.frame(names(table(Trajectory_HCV_S$DEPARTMENT)))
 names(prevalence_dept) <- c("departments")
 prevalence_dept$prevalence <- round(dept.traj.RNA$positive/dept.traj$total, digits = 4)
@@ -135,16 +138,21 @@ riskassessment(mpatient_procedures$pp_transmission[which(mpatient_procedures$ID_
 
 
 #### Loop for risk analysis and sensitivity analysis ####
-patients <- names(table(Patient.Invasive.Procedure$ID_PATIENT))
+patients <- as.numeric(names(table(Patient.Invasive.Procedure$ID_PATIENT)))
 patient_risk <- data.frame(NULL)
-for(i in 1:length(patients)){
+for(i in patients){
   patient_risk[i, "ID Patient"] <- patients[i]
   patient_risk[i, "risk"] <- riskassessment(mpatient_procedures$pp_transmission[which(mpatient_procedures$ID_PATIENT==i)],mpatient_procedures$prevalence[which(mpatient_procedures$ID_PATIENT==i)])
   patient_risk[i, "sensitivity low"] <- riskassessment(mpatient_procedures$pp_lowsensitivity[which(mpatient_procedures$ID_PATIENT==i)],mpatient_procedures$prevalence[which(mpatient_procedures$ID_PATIENT==i)])
   patient_risk[i, "sensitivity high"] <- riskassessment(mpatient_procedures$pp_highsensitivity[which(mpatient_procedures$ID_PATIENT==i)],mpatient_procedures$prevalence[which(mpatient_procedures$ID_PATIENT==i)])
 }
+patient_risk <- patient_risk[-501,]
+patient_risk[which(is.na(patient_risk$'ID Patient')), "ID Patient"] <- "502"
 
-patient_risk <- patient_risk[,c(4,1,2,3)]
-
-# for some reason 502 doesn't work on table
+#check individuals
+#risk
 riskassessment(mpatient_procedures$pp_transmission[which(mpatient_procedures$ID_PATIENT==502)],mpatient_procedures$prevalence[which(mpatient_procedures$ID_PATIENT==502)])
+#lower bound
+riskassessment(mpatient_procedures$pp_lowsensitivity[which(mpatient_procedures$ID_PATIENT==490)],mpatient_procedures$prevalence[which(mpatient_procedures$ID_PATIENT==490)])
+#upper bound
+riskassessment(mpatient_procedures$pp_highsensitivity[which(mpatient_procedures$ID_PATIENT==490)],mpatient_procedures$prevalence[which(mpatient_procedures$ID_PATIENT==490)])
