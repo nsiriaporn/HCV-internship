@@ -1,0 +1,118 @@
+### Risk Analysis ###
+
+# overall mean
+mean(patient_risk$risk)
+sd(patient_risk$risk)
+mean(patient_risk$`sensitivity low`)
+mean(patient_risk$`sensitivity high`)
+
+#### Hospitals ####
+#Merge patient_risk with admission and hopsital data from Patient.Questinnaire
+admis_hosp_risk <- merge(x = patient_risk, y = Patient.Questionnaire[ , c("ID_PATIENT","DEPARTMENT", 
+                                                                          "PLACE_RECRUITMENT")], by = "ID_PATIENT")
+
+#mean risk for surgery hospital
+mean(admis_hosp_risk$risk[which(admis_hosp_risk$DEPARTMENT==1)]) 
+sd(admis_hosp_risk$risk[which(admis_hosp_risk$DEPARTMENT==1)]) 
+mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$DEPARTMENT==1)])
+mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$DEPARTMENT==1)])
+## 0.01347303 sd=0.01533099 (0.006171904 to 0.05393858)
+
+#mean risk for internal medicine hospital
+mean(admis_hosp_risk$risk[which(admis_hosp_risk$DEPARTMENT==2)]) 
+sd(admis_hosp_risk$risk[which(admis_hosp_risk$DEPARTMENT==2)]) 
+mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$DEPARTMENT==2)])
+mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$DEPARTMENT==2)])
+## 0.04650724 sd=0.06884795 (0.02218864 to 0.1593366)
+
+
+#### Admissions by Hospitals ####
+#mean risk for outpatient clinic admission in surgery hospital
+mean(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)])
+sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)])
+mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)])
+mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)])
+## 0.0125163 sd=0.01636614 (0.005737933 to 0.04991165)
+
+#mean risk for ER admission in surgery hospital
+mean(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)])
+sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)])
+mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)])
+mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)])
+## 0.01440911 sd=0.01424288 (0.006596508 to 0.0578786)
+
+#mean risk for outpatient clinic admission in internal medicine hospital
+mean(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)])
+sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)])
+mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)])
+mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)])
+## 0.04782465 sd=0.09044733 (0.02347702 to 0.150755)
+
+#mean risk for ER admission in internal medicine hospital
+mean(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)])
+sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)])
+mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)])
+mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)])
+## 0.04556908 sd=0.04828532 (0.02127116 to 0.1654477)
+#### Gender ####
+#Merge patient_risk with gender data from Patient.Questinnaire
+gender_risk <- merge(patient_risk, Patient.Questionnaire[ , c("ID_PATIENT","GENDER", "DEPARTMENT")], by = "ID_PATIENT")
+
+#mean risk for males in surgery hospital
+mean(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==1)])
+sd(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==1)])
+mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==1)])
+mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==1)])
+## 0.01321508 SD=0.01152152 (0.006040533 to 0.05350532)
+
+#mean risk for females in surgery hospital
+mean(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==1)])
+sd(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==1)])
+mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==1)])
+mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==1)])
+## 0.01381118 SD=0.01926646 (0.006344121 to 0.05450655)
+
+#mean risk for males in internal medicine hospital
+mean(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==2)])
+sd(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==2)])
+mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==2)])
+mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==2)])
+## 0.05166241 SD=0.07966932 (0.02492248 to 0.1718552)
+
+#mean risk for females in internal medicine hospital
+mean(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
+sd(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
+mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
+mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
+## 0.03926806 (0.01834964 to 0.1417573)
+#### Age ####
+# look at the distribution of age in each hospital
+hist(Patient.Questionnaire$AGE)
+
+# age distribution in surgery hospital
+hist(Patient.Questionnaire$AGE[which(Patient.Questionnaire$DEPARTMENT==1)]) ## more patients 20-40
+summary(Patient.Questionnaire$AGE[which(Patient.Questionnaire$DEPARTMENT==1)])
+# age distribution in internal medicine hospital
+hist(Patient.Questionnaire$AGE[which(Patient.Questionnaire$DEPARTMENT==2)]) ## more patients 50-70
+summary(Patient.Questionnaire$AGE[which(Patient.Questionnaire$DEPARTMENT==2)])
+
+#### Duration of stay ####
+Traj <- read.csv("C:/Users/Jung/Desktop/Final extractions/Traj.csv", header=TRUE, sep=";")
+library(dplyr)
+#Data frame composed of patient ID, their hospital (surgery or internal medicine), their admission date, their discharge date and their duration of stay (in days)
+PatStay<-rbind.fill(by(Traj,Traj$ID_PATIENT,function(x) return(data.frame(ID_PATIENT=unique(x$ID_PATIENT),
+                                                                          Hospital=min(x$PLACE),
+                                                                          Admission=min(as.Date(x$DATE_ADMISSION, format="%d/%m/%Y")),
+                                                                          Discharge=max(as.Date(x$DATE_DISCHARGE, format="%d/%m/%Y")),
+                                                                          Duration=as.numeric(max(as.Date(x$DATE_DISCHARGE, format="%d/%m/%Y"))-
+                                                                                                min(as.Date(x$DATE_ADMISSION, format="%d/%m/%Y"))))))) 
+mean(PatStay[PatStay$Hospital==1,"Duration"]) #mean duration of patient stay in the surgery hospital
+mean(PatStay[PatStay$Hospital==2,"Duration"]) #mean duration of patient stay in the internal medicine hospital
+
+## patient 356 is missing!!
+## patient 1 and 491 (at least) has wrong input
+
+## MASIVE DATA CORRECTION ##
+# Identify errors
+View(Patient.Trajectories [c("ï..ID_PATIENTTRAJECTORY", "ID_PATIENT", "DATE_ADMISSION", "DATE_DISCHARGE")])
+# need to add two columns duration and difference of duration
