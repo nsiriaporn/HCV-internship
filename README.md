@@ -135,16 +135,22 @@ riskassessment(mpatient_procedures$pp_transmission[which(mpatient_procedures$ID_
 
 
 #### Loop for risk analysis and sensitivity analysis ####
-patients <- names(table(Patient.Invasive.Procedure$ID_PATIENT))
+patients <- as.numeric(names(table(Patient.Invasive.Procedure$ID_PATIENT)))
 patient_risk <- data.frame(NULL)
-for(i in 1:length(patients)){
-  patient_risk[i, "ID Patient"] <- patients[i]
+i=500
+for(i in patients){
+  patient_risk[i, "ID_PATIENT"] <- patients[i]
   patient_risk[i, "risk"] <- riskassessment(mpatient_procedures$pp_transmission[which(mpatient_procedures$ID_PATIENT==i)],mpatient_procedures$prevalence[which(mpatient_procedures$ID_PATIENT==i)])
   patient_risk[i, "sensitivity low"] <- riskassessment(mpatient_procedures$pp_lowsensitivity[which(mpatient_procedures$ID_PATIENT==i)],mpatient_procedures$prevalence[which(mpatient_procedures$ID_PATIENT==i)])
   patient_risk[i, "sensitivity high"] <- riskassessment(mpatient_procedures$pp_highsensitivity[which(mpatient_procedures$ID_PATIENT==i)],mpatient_procedures$prevalence[which(mpatient_procedures$ID_PATIENT==i)])
 }
+patient_risk <- patient_risk[-501,]
+patient_risk[which(is.na(patient_risk$`ID_PATIENT`)), "ID_PATIENT"] <- "502"
 
-patient_risk <- patient_risk[,c(4,1,2,3)]
-
-# for some reason 502 doesn't work on table
+#check individuals
+#risk
 riskassessment(mpatient_procedures$pp_transmission[which(mpatient_procedures$ID_PATIENT==502)],mpatient_procedures$prevalence[which(mpatient_procedures$ID_PATIENT==502)])
+#lower bound
+riskassessment(mpatient_procedures$pp_lowsensitivity[which(mpatient_procedures$ID_PATIENT==490)],mpatient_procedures$prevalence[which(mpatient_procedures$ID_PATIENT==490)])
+#upper bound
+riskassessment(mpatient_procedures$pp_highsensitivity[which(mpatient_procedures$ID_PATIENT==490)],mpatient_procedures$prevalence[which(mpatient_procedures$ID_PATIENT==490)])
