@@ -63,6 +63,20 @@ mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT=
 ## 0.04556908 sd=0.04828532 (0.02127116 to 0.1654477)
 ## 95CI: 0.03733320 to 0.05380747
 
+library(readxl)
+admission_mean_plot <- read_excel("~/mean for plot.xlsx", sheet = "admission", 
+                                  col_types = c("text", "text", "numeric", "numeric", "numeric","numeric", "numeric"))
+# plot
+ggplot(admission_mean_plot, aes(x=Admission, y=Mean, fill=Hospital))+
+  geom_bar(stat = "identity", position = "dodge")+
+  scale_fill_manual(values=wes_palette(n=2, name="Moonrise2"))+
+  theme(plot.subtitle = element_text(vjust = 1), 
+        plot.caption = element_text(vjust = 1), 
+        axis.title = element_text(face = "bold"), 
+        plot.title = element_text(size = 14, 
+                                  face = "bold", hjust = 0.5)) +
+  labs(title = "Average risk by admission", x = "Admission", y = "Average risk",fill = "Hospitals")
+
 #### Gender ####
 #Merge patient_risk with gender data from Patient.Questinnaire
 gender_risk <- merge(patient_risk, Patient.Questionnaire[ , c("ID_PATIENT","GENDER", "DEPARTMENT")], by = "ID_PATIENT")
@@ -94,7 +108,6 @@ sd(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
 mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
 mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
 ## 0.03926806 (0.01834964 to 0.1417573)
-
 #### Age ####
 # look at the distribution of age in each hospital
 hist(Patient.Questionnaire$AGE)
@@ -109,15 +122,29 @@ summary(Patient.Questionnaire$AGE[which(Patient.Questionnaire$DEPARTMENT==2)])
 #Merge patient_risk with gender data from Patient.Questinnaire
 age_risk <- merge(patient_risk, Patient.Questionnaire[ , c("ID_PATIENT","AGE", "DEPARTMENT")], by = "ID_PATIENT")
 
+# bar plot for surgery hosp (risk by age)
+ggplot(age_risk[which(age_risk$DEPARTMENT==1),], aes(x=AGE, y=risk))+geom_bar(stat="identity") + 
+  theme(plot.subtitle = element_text(vjust = 1), 
+    plot.caption = element_text(vjust = 1), 
+    axis.title = element_text(face = "bold"), 
+    plot.title = element_text(size = 15, face = "bold", hjust = 0.5)) +
+  labs(title = "Risk by age in surgery hospital", x = "Age (year)", y = "Risk")
+# bar plot for surgery hosp (risk by age)
+ggplot(age_risk[which(age_risk$DEPARTMENT==2),], aes(x=AGE, y=risk))+geom_bar(stat="identity")+ 
+  theme(plot.subtitle = element_text(vjust = 1), 
+        plot.caption = element_text(vjust = 1), 
+        axis.title = element_text(face = "bold"), 
+        plot.title = element_text(size = 15, face = "bold", hjust = 0.5)) +
+  labs(title = "Risk by age in internal medicine hospital",  x = "Age (year)", y = "Risk")
+
 # age distribution box plot
 age_risk$DEPARTMENT <- as.character(age_risk$DEPARTMENT)
 ggplot(age_risk, aes(x=DEPARTMENT,  y=AGE)) + 
   geom_boxplot()+
   scale_x_discrete(labels=c("Surgery", "Internal med")) + theme(axis.title = element_text(face = "bold"), 
-    plot.title = element_text(size = 14, 
-        face = "bold", hjust = 0.5)) +labs(title = "Age distribution in surgery and internal medicine hopsital", 
-    x = "Hospital", y = "Age (years)")
-
+                                                                plot.title = element_text(size = 14, 
+                                                                                          face = "bold", hjust = 0.5)) +labs(title = "Age distribution in surgery and internal medicine hopsital", 
+                                                                                                                             x = "Hospital", y = "Age (years)")
 
 #Surgery hospital: 21-28, 29-36, 37-50, 51-85
 
@@ -157,6 +184,18 @@ mean(age_risk$`sensitivity high`[which(age_risk$AGE>50 & age_risk$AGE<86 & age_r
 ## 0.01726273 SD=0.02125035 (0.007935469 to 0.06781461)
 ## 95CI: 0.01221202 to 0.02231345
 
+library(readxl)
+surg_age_mean_plot <- read_excel("~/mean for plot.xlsx", sheet = "Age Surgery", col_types = c("text", 
+                                                                      "text", "numeric", "numeric", "numeric", 
+                                                                      "numeric"))
+ggplot(surg_age_mean_plot, aes(x=Group, y=Mean))+
+  geom_bar(stat = "identity")+
+  theme(plot.subtitle = element_text(vjust = 1), 
+        plot.caption = element_text(vjust = 1), 
+        axis.title = element_text(face = "bold"), 
+        plot.title = element_text(size = 14, face = "bold", hjust = 0.5)) +
+  labs(title = "Average risk by age group in surgery hospital", x = "Age group", y = "Average risk")
+
 
 #Internal med hospital: 21-42, 43-55, 56-64, 65-84
 #mean risk for 21-42 yo in int med hospital
@@ -195,6 +234,19 @@ mean(age_risk$`sensitivity high`[which(age_risk$AGE>64 & age_risk$AGE<85 & age_r
 ## 0.05149226 SD=0.06536967 (0.02431867 to 0.1767604)
 ## 95CI: 0.03389332 to 0.06909119
 
+library(readxl)
+int_med_age_mean_plot <- read_excel("~/mean for plot.xlsx", sheet = "Age Int Med", col_types = c("text", 
+                                                                         "text", "numeric", "numeric", "numeric", 
+                                                                         "numeric"))
+ggplot(int_med_age_mean_plot, aes(x=Group, y=Mean))+
+  geom_bar(stat = "identity")+
+  theme(plot.subtitle = element_text(vjust = 1), 
+        plot.caption = element_text(vjust = 1), 
+        axis.title = element_text(face = "bold"), 
+        plot.title = element_text(size = 14, face = "bold", hjust = 0.5)) +
+  labs(title = "Average risk by age group in internal med hospital", x = "Age group", y = "Average risk")
+
+
 #### Duration of stay ####
 Traj <- read.csv("C:/Users/Jung/Desktop/Final extractions/Traj.csv", header=TRUE, sep=";")
 library(dplyr)
@@ -216,31 +268,29 @@ mean(PatStay[PatStay$Hospital==2,"Duration"]) #mean duration of patient stay in 
 View(Patient.Trajectories [c("ï..ID_PATIENTTRAJECTORY", "ID_PATIENT", "DATE_ADMISSION", "DATE_DISCHARGE")])
 # need to add two columns duration and difference of duration
 
-
 # Trial
 library(readxl)
-traj_trial <- read_excel("C:/Users/jungg/Dropbox/Internship/trial2.xlsx", 
-                          col_types = c("numeric", "numeric", "numeric","numeric", "numeric", "numeric", 
-                                        "text", "date", "text", "date", "text","text", "text", "text", "numeric"))
-PatStay_trial<-rbind.fill(by(traj_trial,traj_trial$ID_PATIENT,function(x) return(data.frame(ID_PATIENT=unique(x$ID_PATIENT),
-                                                                             Hospital=min(x$PLACE),
-                                                                             Admission=min(as.Date(x$DATE_ADMISSION, format="%d/%m/%Y")),
-                                                                             Discharge=max(as.Date(x$DATE_DISCHARGE, format="%d/%m/%Y")),
-                                                                             Duration=as.numeric(max(as.Date(x$DATE_DISCHARGE, format="%d/%m/%Y"))-
-                                                                                                   min(as.Date(x$DATE_ADMISSION, format="%d/%m/%Y"))))))) 
+traj_trial <- read_excel("C:/Users/Jung/Desktop/Final extractions/trial2.xlsx", 
+                         col_types = c("numeric", "numeric", "numeric","numeric", "numeric", "numeric", 
+                                       "text", "date", "text", "date", "text","text", "text", "text", "numeric"))
+PatStay_trial<-rbind.fill(by(traj_trial,traj_trial$ID_PATIENT,function(x) 
+  return(data.frame(ID_PATIENT=unique(x$ID_PATIENT), Hospital=min(x$PLACE),
+                    Admission=min(as.Date(x$DATE_ADMISSION, format="%d/%m/%Y")),
+                    Discharge=max(as.Date(x$DATE_DISCHARGE, format="%d/%m/%Y")),
+                    Duration=as.numeric(max(as.Date(x$DATE_DISCHARGE, format="%d/%m/%Y"))-min(as.Date(x$DATE_ADMISSION, format="%d/%m/%Y"))))))) 
 
 
 
 # Fixed on new excel spread sheet
 library(readxl)
-traj2 <- read_excel("C:/Users/jungg/Dropbox/Internship/traj data correction.xlsx")
+traj2 <- read_excel("C:/Users/Jung/Desktop/Final extractions/traj data correction.xlsx")
 #Data frame composed of patient ID, their hospital (surgery or internal medicine), their admission date, their discharge date and their duration of stay (in days)
 PatStay2<-rbind.fill(by(traj2,traj2$ID_PATIENT,function(x) return(data.frame(ID_PATIENT=unique(x$ID_PATIENT),
-                                                                          Hospital=min(x$PLACE),
-                                                                          Admission=min(as.Date(x$DATE_ADMISSION, format="%d/%m/%Y")),
-                                                                          Discharge=max(as.Date(x$DATE_DISCHARGE, format="%d/%m/%Y")),
-                                                                          Duration=as.numeric(max(as.Date(x$DATE_DISCHARGE, format="%d/%m/%Y"))-
-                                                                                                min(as.Date(x$DATE_ADMISSION, format="%d/%m/%Y"))))))) 
+                                                                             Hospital=min(x$PLACE),
+                                                                             Admission=min(as.Date(x$DATE_ADMISSION, format="%d/%m/%Y")),
+                                                                             Discharge=max(as.Date(x$DATE_DISCHARGE, format="%d/%m/%Y")),
+                                                                             Duration=as.numeric(max(as.Date(x$DATE_DISCHARGE, format="%d/%m/%Y"))-
+                                                                                                   min(as.Date(x$DATE_ADMISSION, format="%d/%m/%Y"))))))) 
 mean(PatStay2[PatStay2$Hospital==1,"Duration"]) #mean duration of patient stay in the surgery hospital
 mean(PatStay2[PatStay2$Hospital==2,"Duration"]) #mean duration of patient stay in the internal medicine hospital
 
@@ -257,6 +307,8 @@ hist(PatStay2$Duration[which(PatStay2$Hospital==2)])
 #Merge patient_risk with duration of stay data from PatStay2
 duration_risk <- merge(x = patient_risk, y = PatStay2[ , c("ID_PATIENT","Hospital", "Duration")], 
                        by = "ID_PATIENT")
+duration_risk$Hospital <- as.character(duration_risk$Hospital)
+duration_risk$ID_PATIENT <- as.numeric(duration_risk$ID_PATIENT)
 
 #box plot for duration by hospital with outliers
 library(ggplot2)
@@ -264,12 +316,119 @@ ggplot(duration_risk, aes(x=Hospital, y=Duration)) +
   geom_boxplot(outlier.colour="red", outlier.shape=4, outlier.size=4) + 
   scale_x_discrete(labels=c("Surgery", "Internal med")) +
   theme(plot.title = element_text(size = 14, 
-    face = "bold", hjust = 0.5)) +labs(title = "Duration of Stay by Hospitals", 
-    x = "Hospitals", y = "Duration (days)") + theme(axis.title = element_text(face = "bold"))
+                                  face = "bold", hjust = 0.5)) +labs(title = "Duration of Stay by Hospitals", 
+                                                                     x = "Hospitals", y = "Duration (days)") + theme(axis.title = element_text(face = "bold"))
 
 hist(duration_risk$Duration[which(duration_risk$Hospital==1)])
 hist(duration_risk$Duration[which(duration_risk$Hospital==2)])
 
+# short stays (less than 5 days)
+# medium stays (5-15 days)
+# long stays (more than 15 days)
+
+#mean risk for short stay in surgery hospital
+mean(duration_risk$risk[which(duration_risk$Duration<5 & duration_risk$Hospital==1)])
+sd(duration_risk$risk[which(duration_risk$Duration<5 & duration_risk$Hospital==1)])
+z.test(duration_risk$risk[which(duration_risk$Duration<5  & duration_risk$Hospital==1)], sigma.x = 0.009677297)
+mean(duration_risk$`sensitivity low`[which(duration_risk$Duration<5 & duration_risk$Hospital==1)])
+mean(duration_risk$`sensitivity high`[which(duration_risk$Duration<5 & duration_risk$Hospital==1)])
+
+#mean risk for medium stay in surgery hospital
+mean(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)])
+sd(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)])
+z.test(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)], sigma.x = 0.03482567)
+mean(duration_risk$`sensitivity low`[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)])
+mean(duration_risk$`sensitivity high`[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)])
+
+#mean risk for long stay in surgery hospital
+mean(duration_risk$risk[which(duration_risk$Duration>15 & duration_risk$Hospital==1)])
+sd(duration_risk$risk[which(duration_risk$Duration>15 & duration_risk$Hospital==1)])
+z.test(duration_risk$risk[which(duration_risk$Duration>15  & duration_risk$Hospital==1)], sigma.x = 0.4127112)
+mean(duration_risk$`sensitivity low`[which(duration_risk$Duration>15 & duration_risk$Hospital==1)])
+mean(duration_risk$`sensitivity high`[which(duration_risk$Duration>15 & duration_risk$Hospital==1)])
+
+#mean risk for short stay in internal med hospital
+mean(duration_risk$risk[which(duration_risk$Duration<5 & duration_risk$Hospital==2)])
+sd(duration_risk$risk[which(duration_risk$Duration<5 & duration_risk$Hospital==2)])
+z.test(duration_risk$risk[which(duration_risk$Duration<5  & duration_risk$Hospital==2)], sigma.x = 0.03072895)
+mean(duration_risk$`sensitivity low`[which(duration_risk$Duration<5 & duration_risk$Hospital==2)])
+mean(duration_risk$`sensitivity high`[which(duration_risk$Duration<5 & duration_risk$Hospital==2)])
+
+#mean risk for medium stay in internal med hospital
+mean(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)])
+sd(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)])
+z.test(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)], sigma.x = 0.0598927)
+mean(duration_risk$`sensitivity low`[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)])
+mean(duration_risk$`sensitivity high`[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)])
+
+#mean risk for long stay in internal med hospital
+mean(duration_risk$risk[which(duration_risk$Duration>15 & duration_risk$Hospital==2)])
+sd(duration_risk$risk[which(duration_risk$Duration>15 & duration_risk$Hospital==2)])
+z.test(duration_risk$risk[which(duration_risk$Duration>15  & duration_risk$Hospital==2)], sigma.x = 0.0993748)
+mean(duration_risk$`sensitivity low`[which(duration_risk$Duration>15 & duration_risk$Hospital==2)])
+mean(duration_risk$`sensitivity high`[which(duration_risk$Duration>15 & duration_risk$Hospital==2)])
+
+## Create plot 
+# grouping
+attach(duration_risk)
+duration_risk$Group[Duration<5] <- "Short stay"
+duration_risk$Group[Duration>4 & Duration<16]  <- "Medium stay"
+duration_risk$Group[Duration>15] <- "Long stay"
+detach(duration_risk)
+
+library(wesanderson)
+library(ggplot2)
+library(readxl)
+duration_mean_plot <- read_excel("~/mean for plot.xlsx", sheet = "Duration", col_types = c("text", 
+                                                                   "text", "numeric", "numeric", "numeric", 
+                                                                   "numeric", "numeric"))
+duration_mean_plot$Mean <- round((duration_mean_plot$Mean*100),2)
+ggplot(duration_mean_plot, aes(x=Group, y=Mean, fill=Hospital))+
+  geom_bar(stat = "identity", position = "dodge")+
+  scale_fill_manual(values=wes_palette(n=2, name="Moonrise2"))+
+  theme(plot.subtitle = element_text(vjust = 1), 
+    plot.caption = element_text(vjust = 1), 
+    axis.title = element_text(face = "bold"), 
+    plot.title = element_text(size = 14, 
+        face = "bold", hjust = 0.5)) +labs(title = "Average risk by duration of stay", 
+    x = "Duration of stay", y = "Average risk (%)", 
+    fill = "Hospitals")
+
+
+#### Departments ####
+dept_risk <- merge(patient_risk, Patient.Trajectories[ , c("ID_PATIENT", "DEPARTMENT")], by = "ID_PATIENT")
+
+
+dept_mean_plot <- data.frame(NULL)
+i=28
+for(i in department){
+  dept_mean_plot[i, "departments"] <- department[i]
+  dept_mean_plot[i, "mean"] <- mean(dept_risk$risk[which(dept_risk$DEPARTMENT==i)])
+  dept_mean_plot[i, "sens low"] <- mean(dept_risk$`sensitivity low`[which(dept_risk$DEPARTMENT==i)])
+  dept_mean_plot[i, "sens high"] <- mean(dept_risk$`sensitivity high`[which(dept_risk$DEPARTMENT==i)])
+}
+dept_mean_plot$departments=department
+dept_mean_plot$departments <- factor(dept_mean_plot$departments, 
+                               levels = c(-1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 
+                                          18, 19, 20, 21, 22, 23, 24, 25, 26, 27),
+                               labels = c("Data not available", "GIT and endoscopy", "Endocrinology", 
+                                          "Immunology and allergy","Hematology", "Rheumatology", "Geriatric", 
+                                          "Chest", "Nephrology", "Cardiology", "Cardiac catheterization", 
+                                          "Neurology", "Tropical", "Dermatology", "Ophthalmology","Dialysis", 
+                                          "ICU", "Orthopedics", "General surgery", "ER building", "Neuro surgery",
+                                          "Urosurgery", "Burn", "ENT", "Plastic surgery", "OR", "Radiology", 
+                                          "Clinical pathology"))
+
+ggplot(dept_mean_plot, aes(x=reorder(departments, mean), y=mean))+
+  geom_bar(stat = "identity", position = "dodge")+coord_flip() + 
+  geom_text(aes(y=mean, label=round(mean,4), hjust=-0.02))+
+  theme(plot.subtitle = element_text(vjust = 1), 
+    plot.caption = element_text(vjust = 1), 
+    axis.title = element_text(face = "bold"), 
+    plot.title = element_text(size = 15, 
+        face = "bold", hjust = 0.5)) +labs(title = "Average risk in departments", x = "Departments", 
+    y = "Average risk")
+  
 
 #### Education #####
 #Merge patient_risk with education data from Patient.Questinnaire
