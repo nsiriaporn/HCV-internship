@@ -54,6 +54,7 @@ sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_
 mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)])
 mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)])
 ## 0.04556908 sd=0.04828532 (0.02127116 to 0.1654477)
+
 #### Gender ####
 #Merge patient_risk with gender data from Patient.Questinnaire
 gender_risk <- merge(patient_risk, Patient.Questionnaire[ , c("ID_PATIENT","GENDER", "DEPARTMENT")], by = "ID_PATIENT")
@@ -85,6 +86,7 @@ sd(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
 mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
 mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
 ## 0.03926806 (0.01834964 to 0.1417573)
+
 #### Age ####
 # look at the distribution of age in each hospital
 hist(Patient.Questionnaire$AGE)
@@ -116,3 +118,104 @@ mean(PatStay[PatStay$Hospital==2,"Duration"]) #mean duration of patient stay in 
 # Identify errors
 View(Patient.Trajectories [c("ï..ID_PATIENTTRAJECTORY", "ID_PATIENT", "DATE_ADMISSION", "DATE_DISCHARGE")])
 # need to add two columns duration and difference of duration
+
+
+# Trial
+library(readxl)
+traj_trial <- read_excel("C:/Users/jungg/Dropbox/Internship/trial2.xlsx", 
+                          col_types = c("numeric", "numeric", "numeric","numeric", "numeric", "numeric", 
+                                        "text", "date", "text", "date", "text","text", "text", "text", "numeric"))
+PatStay_trial<-rbind.fill(by(traj_trial,traj_trial$ID_PATIENT,function(x) return(data.frame(ID_PATIENT=unique(x$ID_PATIENT),
+                                                                             Hospital=min(x$PLACE),
+                                                                             Admission=min(as.Date(x$DATE_ADMISSION, format="%d/%m/%Y")),
+                                                                             Discharge=max(as.Date(x$DATE_DISCHARGE, format="%d/%m/%Y")),
+                                                                             Duration=as.numeric(max(as.Date(x$DATE_DISCHARGE, format="%d/%m/%Y"))-
+                                                                                                   min(as.Date(x$DATE_ADMISSION, format="%d/%m/%Y"))))))) 
+
+
+
+# Fixed on new excel spread sheet
+library(readxl)
+traj2 <- read_excel("C:/Users/jungg/Dropbox/Internship/traj data correction.xlsx")
+#Data frame composed of patient ID, their hospital (surgery or internal medicine), their admission date, their discharge date and their duration of stay (in days)
+PatStay2<-rbind.fill(by(traj2,traj2$ID_PATIENT,function(x) return(data.frame(ID_PATIENT=unique(x$ID_PATIENT),
+                                                                          Hospital=min(x$PLACE),
+                                                                          Admission=min(as.Date(x$DATE_ADMISSION, format="%d/%m/%Y")),
+                                                                          Discharge=max(as.Date(x$DATE_DISCHARGE, format="%d/%m/%Y")),
+                                                                          Duration=as.numeric(max(as.Date(x$DATE_DISCHARGE, format="%d/%m/%Y"))-
+                                                                                                min(as.Date(x$DATE_ADMISSION, format="%d/%m/%Y"))))))) 
+mean(PatStay2[PatStay2$Hospital==1,"Duration"]) #mean duration of patient stay in the surgery hospital
+mean(PatStay2[PatStay2$Hospital==2,"Duration"]) #mean duration of patient stay in the internal medicine hospital
+
+# descriptive
+summary(PatStay2$Duration) #overall 
+hist(PatStay2$Duration)
+
+summary(PatStay2$Duration[which(PatStay2$Hospital==1)]) #surgery hospital
+hist(PatStay2$Duration[which(PatStay2$Hospital==1)])
+
+summary(PatStay2$Duration[which(PatStay2$Hospital==2)]) #internal med hospital
+hist(PatStay2$Duration[which(PatStay2$Hospital==2)])
+
+#Merge patient_risk with duration of stay data from PatStay2
+duration_risk <- merge(x = patient_risk, y = PatStay2[ , c("ID_PATIENT","Hospital", "Duration")], 
+                       by = "ID_PATIENT")
+
+#box plot for duration by hospital with outliers
+library(ggplot2)
+ggplot(duration_risk, aes(x=Hospital, y=Duration)) + 
+  geom_boxplot(outlier.colour="red", outlier.shape=4, outlier.size=4) + 
+  scale_x_discrete(labels=c("Surgery", "Internal med")) +
+  theme(plot.title = element_text(size = 14, 
+    face = "bold", hjust = 0.5)) +labs(title = "Duration of Stay by Hospitals", 
+    x = "Hospitals", y = "Duration (days)") + theme(axis.title = element_text(face = "bold"))
+
+hist(duration_risk$Duration[which(duration_risk$Hospital==1)])
+hist(duration_risk$Duration[which(duration_risk$Hospital==2)])
+
+
+#### Education #####
+#Merge patient_risk with education data from Patient.Questinnaire
+educ_risk <- merge(patient_risk, Patient.Questionnaire[ , c("ID_PATIENT","EDUCATION_LEVEL", "DEPARTMENT")], by = "ID_PATIENT")
+
+#Illiterate
+mean(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==1)])
+sd(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==1)])
+z.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==1)], sigma.x = 0.05631366)
+mean(age_risk$`sensitivity low`[which(educ_risk$EDUCATION_LEVEL==1)])
+mean(age_risk$`sensitivity high`[which(educ_risk$EDUCATION_LEVEL==1)])
+
+#Can read and write w/o formal education
+mean(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==2)])
+sd(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==2)])
+z.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==2)], sigma.x = 0.07913644)
+mean(age_risk$`sensitivity low`[which(educ_risk$EDUCATION_LEVEL==2)])
+mean(age_risk$`sensitivity high`[which(educ_risk$EDUCATION_LEVEL==2)])
+
+#Primary school
+mean(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==3)])
+sd(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==3)])
+z.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==3)], sigma.x = 0.04191415)
+mean(age_risk$`sensitivity low`[which(educ_risk$EDUCATION_LEVEL==3)])
+mean(age_risk$`sensitivity high`[which(educ_risk$EDUCATION_LEVEL==3)])
+
+#Preparatory school
+mean(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==4)])
+sd(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==4)])
+z.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==4)], sigma.x = 0.02097112)
+mean(age_risk$`sensitivity low`[which(educ_risk$EDUCATION_LEVEL==4)])
+mean(age_risk$`sensitivity high`[which(educ_risk$EDUCATION_LEVEL==4)])
+
+#Secondary school
+mean(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==5)])
+sd(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==5)])
+z.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==5)], sigma.x = 0.02976827)
+mean(age_risk$`sensitivity low`[which(educ_risk$EDUCATION_LEVEL==5)])
+mean(age_risk$`sensitivity high`[which(educ_risk$EDUCATION_LEVEL==5)])
+
+#Higher education
+mean(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==6)])
+sd(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==6)])
+z.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==6)], sigma.x = 0.03715145)
+mean(age_risk$`sensitivity low`[which(educ_risk$EDUCATION_LEVEL==6)])
+mean(age_risk$`sensitivity high`[which(educ_risk$EDUCATION_LEVEL==6)])
