@@ -98,6 +98,95 @@ summary(Patient.Questionnaire$AGE[which(Patient.Questionnaire$DEPARTMENT==1)])
 hist(Patient.Questionnaire$AGE[which(Patient.Questionnaire$DEPARTMENT==2)]) ## more patients 50-70
 summary(Patient.Questionnaire$AGE[which(Patient.Questionnaire$DEPARTMENT==2)])
 
+#Merge patient_risk with gender data from Patient.Questinnaire
+age_risk <- merge(patient_risk, Patient.Questionnaire[ , c("ID_PATIENT","AGE", "DEPARTMENT")], by = "ID_PATIENT")
+
+# age distribution box plot
+age_risk$DEPARTMENT <- as.character(age_risk$DEPARTMENT)
+ggplot(age_risk, aes(x=DEPARTMENT,  y=AGE)) + 
+  geom_boxplot()+
+  scale_x_discrete(labels=c("Surgery", "Internal med")) + theme(axis.title = element_text(face = "bold"), 
+    plot.title = element_text(size = 14, 
+        face = "bold", hjust = 0.5)) +labs(title = "Age distribution in surgery and internal medicine hopsital", 
+    x = "Hospital", y = "Age (years)")
+
+
+#Surgery hospital: 21-28, 29-36, 37-50, 51-85
+
+#mean risk for 21-28 yo in surgery hospital
+mean(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<29 & age_risk$DEPARTMENT==1)])
+sd(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<29 & age_risk$DEPARTMENT==1)])
+z.test(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<29 & age_risk$DEPARTMENT==1)], sigma.x = 0.0123)
+mean(age_risk$`sensitivity low`[which(age_risk$AGE>20 & age_risk$AGE<29 & age_risk$DEPARTMENT==1)])
+mean(age_risk$`sensitivity high`[which(age_risk$AGE>20 & age_risk$AGE<29 & age_risk$DEPARTMENT==1)])
+## 0.01341298 SD=0.01233967 (0.00613281 to 0.0542148)
+## 95CI: 0.01068334 to  0.01614262
+
+#mean risk for 29-36 yo in surgery hospital
+mean(age_risk$risk[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTMENT==1)])
+sd(age_risk$risk[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTMENT==1)])
+z.test(age_risk$risk[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTMENT==1)], sigma.x = 0.010288)
+mean(age_risk$`sensitivity low`[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTMENT==1)])
+mean(age_risk$`sensitivity high`[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTMENT==1)])
+## 0.01186815 SD=0.01028844 (0.005420593 to 0.04825749)
+## 95CI: 0.009386122 to 0.014350183
+
+#mean risk for 37-50 yo in surgery hospital
+mean(age_risk$risk[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTMENT==1)])
+sd(age_risk$risk[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTMENT==1)])
+z.test(age_risk$risk[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTMENT==1)], sigma.x = 0.015045)
+mean(age_risk$`sensitivity low`[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTMENT==1)])
+mean(age_risk$`sensitivity high`[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTMENT==1)])
+## 0.0111354 SD=0.01504522 (0.005102554 to 0.04456113)
+## 95CI: 0.007420307 to 0.014850498
+
+#mean risk for 51-85 yo in surgery hospital
+mean(age_risk$risk[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTMENT==1)])
+sd(age_risk$risk[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTMENT==1)])
+z.test(age_risk$risk[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTMENT==1)], sigma.x = 0.02125)
+mean(age_risk$`sensitivity low`[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTMENT==1)])
+mean(age_risk$`sensitivity high`[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTMENT==1)])
+## 0.01726273 SD=0.02125035 (0.007935469 to 0.06781461)
+## 95CI: 0.01221202 to 0.02231345
+
+
+#Internal med hospital: 21-42, 43-55, 56-64, 65-84
+#mean risk for 21-42 yo in int med hospital
+mean(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<43 & age_risk$DEPARTMENT==2)])
+sd(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<43 & age_risk$DEPARTMENT==2)])
+z.test(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<43 & age_risk$DEPARTMENT==2)], sigma.x = 0.494485)
+mean(age_risk$`sensitivity low`[which(age_risk$AGE>20 & age_risk$AGE<43 & age_risk$DEPARTMENT==2)])
+mean(age_risk$`sensitivity high`[which(age_risk$AGE>20 & age_risk$AGE<43 & age_risk$DEPARTMENT==2)])
+## 0.03653981 SD=0.04944854 (0.0170932 to 0.1315349)
+## 95CI: -0.09183026  to 0.16490988
+
+#mean risk for 43-55 yo in int med hospital
+mean(age_risk$risk[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTMENT==2)])
+sd(age_risk$risk[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTMENT==2)])
+z.test(age_risk$risk[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTMENT==2)], sigma.x = 0.102205)
+mean(age_risk$`sensitivity low`[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTMENT==2)])
+mean(age_risk$`sensitivity high`[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTMENT==2)])
+## 0.05466068 SD=0.1022054 (0.0271834 to 0.1681003)
+## 95CI: 0.02858149 to 0.08073988
+
+#mean risk for 56-64 yo in int med hospital
+mean(age_risk$risk[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTMENT==2)])
+sd(age_risk$risk[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTMENT==2)])
+z.test(age_risk$risk[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTMENT==2)], sigma.x = 0.040115)
+mean(age_risk$`sensitivity low`[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTMENT==2)])
+mean(age_risk$`sensitivity high`[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTMENT==2)])
+## 0.04340221 SD=0.04011538 (0.0201348 to 0.1618702)
+## 95CI: 0.03298821 to 0.05381620
+
+#mean risk for 65-84 yo in int med hospital
+mean(age_risk$risk[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTMENT==2)])
+sd(age_risk$risk[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTMENT==2)])
+z.test(age_risk$risk[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTMENT==2)], sigma.x = 0.06536967)
+mean(age_risk$`sensitivity low`[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTMENT==2)])
+mean(age_risk$`sensitivity high`[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTMENT==2)])
+## 0.05149226 SD=0.06536967 (0.02431867 to 0.1767604)
+## 95CI: 0.03389332 to 0.06909119
+
 #### Duration of stay ####
 Traj <- read.csv("C:/Users/Jung/Desktop/Final extractions/Traj.csv", header=TRUE, sep=";")
 library(dplyr)
