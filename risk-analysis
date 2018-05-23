@@ -30,30 +30,38 @@ mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$DEPARTMENT==2)])
 #mean risk for outpatient clinic admission in surgery hospital
 mean(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)])
 sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)])
+z.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)], sigma.x = 0.01636614)
 mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)])
 mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)])
 ## 0.0125163 sd=0.01636614 (0.005737933 to 0.04991165)
+## 95CI: 0.009763482 to 0.015264650
 
 #mean risk for ER admission in surgery hospital
 mean(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)])
 sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)])
+z.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)], sigma.x = 0.01424288)
 mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)])
 mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)])
 ## 0.01440911 sd=0.01424288 (0.006596508 to 0.0578786)
+## 95CI: 0.01204226 to 0.01677779
 
 #mean risk for outpatient clinic admission in internal medicine hospital
 mean(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)])
 sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)])
+z.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)], sigma.x = 0.09044733)
 mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)])
 mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)])
 ## 0.04782465 sd=0.09044733 (0.02347702 to 0.150755)
+## 95CI: 0.02953990 to 0.06610863
 
 #mean risk for ER admission in internal medicine hospital
 mean(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)])
 sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)])
+z.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)], sigma.x = 0.04828532)
 mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)])
 mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)])
 ## 0.04556908 sd=0.04828532 (0.02127116 to 0.1654477)
+## 95CI: 0.03733320 to 0.05380747
 
 #### Gender ####
 #Merge patient_risk with gender data from Patient.Questinnaire
