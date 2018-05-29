@@ -46,9 +46,7 @@ ggplot(hosp_mean_plot, aes(hosp, mean))+
     plot.title = element_text(size = 15, 
         face = "bold", hjust = 0.5)) +labs(title = "Average risk in hospsitals", 
     x = "Hospital", y = "Average risk (%)", 
-    caption = "Error bar at 95% confidence interval")+
-  labs(caption = "Error bar at 95% confidence interval
-Two-sample t-test: P-value < 0.0001")
+    caption = "Two-sample t-test: P-value < 0.0001")
 
 
 #### Admissions by Hospitals ####
@@ -147,6 +145,8 @@ sd(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==1)])
 mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==1)])
 mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==1)])
 ## 0.01321508 SD=0.01152152 (0.006040533 to 0.05350532)
+t.test(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==1)], sigma.x = 0.01152152)
+## 95CI 0.01139286 to 0.01503729
 
 #mean risk for females in surgery hospital
 mean(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==1)])
@@ -154,6 +154,8 @@ sd(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==1)])
 mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==1)])
 mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==1)])
 ## 0.01381118 SD=0.01926646 (0.006344121 to 0.05450655)
+t.test(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==1)], sigma.x = 0.01926646)
+## 95CI 0.01031372 to 0.01730865
 
 #mean risk for males in internal medicine hospital
 mean(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==2)])
@@ -161,6 +163,8 @@ sd(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==2)])
 mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==2)])
 mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==2)])
 ## 0.05166241 SD=0.07966932 (0.02492248 to 0.1718552)
+t.test(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==2)], sigma.x = 0.07966932)
+## 95CI 0.03794466 to 0.06538016
 
 #mean risk for females in internal medicine hospital
 mean(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
@@ -168,10 +172,34 @@ sd(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
 mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
 mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
 ## 0.03926806 (0.01834964 to 0.1417573)
+t.test(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)], sigma.x = 0.04936061)
+## 95CI 0.02915803 to 0.04937809
 
 gender_risk$gender_hosp <- paste(gender_risk$GENDER, gender_risk$DEPARTMENT)
 gender_risk$gender_hosp <- as.factor(gender_risk$gender_hosp)
 kruskal.test(risk ~ gender_hosp, data=gender_risk) #P-value < 0.0001
+
+library(readxl)
+gender_mean_plot <- read_excel("~/mean for plot.xlsx", sheet = "gender", 
+                                  col_types = c("text", "text", "numeric", "numeric", "numeric","numeric", "numeric"))
+
+# plot
+library(ggplot2)
+library(wesanderson)
+dodge <- position_dodge(width=0.9)
+ggplot(gender_mean_plot, aes(x=Gender, y=Mean, fill=Hospital))+
+  geom_text(position=position_dodge(width = 1), aes(y=Mean, label=Mean, hjust=1.6, vjust=-0.4))+
+  geom_bar(stat = "identity", position = "dodge")+
+  geom_col(position = dodge)+
+  geom_errorbar(aes(ymin=CIL, ymax=CIU), position = dodge, width=0.25) +
+  scale_fill_manual(values=wes_palette(n=2, name="Moonrise2"))+
+  theme(plot.subtitle = element_text(vjust = 1), 
+        plot.caption = element_text(vjust = 1), 
+        axis.title = element_text(face = "bold"), 
+        plot.title = element_text(size = 14, 
+                                  face = "bold", hjust = 0.5)) +
+  labs(title = "Average risk by gender", x = "Gender", y = "Average risk (%)",fill = "Hospitals")+
+  labs(caption = "Kruskal-Wallis test: P-value < 0.0001")
 
 #### Age ####
 # look at the distribution of age in each hospital
@@ -205,11 +233,10 @@ ggplot(age_risk[which(age_risk$DEPARTMENT==2),], aes(x=AGE, y=risk))+geom_bar(st
 # age distribution box plot
 age_risk$DEPARTMENT <- as.character(age_risk$DEPARTMENT)
 ggplot(age_risk, aes(x=DEPARTMENT,  y=AGE)) + 
-  geom_boxplot()+
-  scale_x_discrete(labels=c("Surgery", "Internal med")) + theme(axis.title = element_text(face = "bold"), 
-                                                                plot.title = element_text(size = 14, 
-                                                                                          face = "bold", hjust = 0.5)) +labs(title = "Age distribution in surgery and internal medicine hopsital", 
-                                                                                                                             x = "Hospital", y = "Age (years)")
+  geom_boxplot(outlier.colour = "red", outlier.shape = 1)+
+  scale_x_discrete(labels=c("Surgery", "Internal med")) + 
+  theme(axis.title = element_text(face = "bold"), plot.title = element_text(size = 14, face = "bold", hjust = 0.5)) +
+  labs(title = "Age distribution in surgery and internal medicine hopsital", x = "Hospital", y = "Age (years)")
 
 #Surgery hospital: 21-28, 29-36, 37-50, 51-85
 
@@ -220,7 +247,8 @@ z.test(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<29 & age_risk$DEPARTME
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>20 & age_risk$AGE<29 & age_risk$DEPARTMENT==1)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>20 & age_risk$AGE<29 & age_risk$DEPARTMENT==1)])
 ## 0.01341298 SD=0.01233967 (0.00613281 to 0.0542148)
-## 95CI: 0.01068334 to  0.01614262
+t.test(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<29 & age_risk$DEPARTMENT==1)], sigma.x = 0.0123)
+## 95CI: 0.01063082 to 0.01619601
 
 #mean risk for 29-36 yo in surgery hospital
 mean(age_risk$risk[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTMENT==1)])
@@ -229,7 +257,8 @@ z.test(age_risk$risk[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTME
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTMENT==1)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTMENT==1)])
 ## 0.01186815 SD=0.01028844 (0.005420593 to 0.04825749)
-## 95CI: 0.009386122 to 0.014350183
+t.test(age_risk$risk[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTMENT==1)], sigma.x = 0.01029285)
+## 95CI: 0.009338386 to 0.014398980
 
 #mean risk for 37-50 yo in surgery hospital
 mean(age_risk$risk[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTMENT==1)])
@@ -238,7 +267,8 @@ z.test(age_risk$risk[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTME
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTMENT==1)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTMENT==1)])
 ## 0.0111354 SD=0.01504522 (0.005102554 to 0.04456113)
-## 95CI: 0.007420307 to 0.014850498
+t.test(age_risk$risk[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTMENT==1)], sigma.x = 0.01504106)
+## 95CI: 0.007346985 to 0.014923071
 
 #mean risk for 51-85 yo in surgery hospital
 mean(age_risk$risk[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTMENT==1)])
@@ -247,7 +277,8 @@ z.test(age_risk$risk[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTME
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTMENT==1)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTMENT==1)])
 ## 0.01726273 SD=0.02125035 (0.007935469 to 0.06781461)
-## 95CI: 0.01221202 to 0.02231345
+t.test(age_risk$risk[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTMENT==1)], sigma.x = 0.02125454)
+## 95CI: 0.01211997 to 0.02240936
 
 library(readxl)
 surg_age_mean_plot <- read_excel("~/mean for plot.xlsx", sheet = "Age Surgery", col_types = c("text", 
@@ -281,7 +312,8 @@ z.test(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<43 & age_risk$DEPARTME
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>20 & age_risk$AGE<43 & age_risk$DEPARTMENT==2)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>20 & age_risk$AGE<43 & age_risk$DEPARTMENT==2)])
 ## 0.03653981 SD=0.04944854 (0.0170932 to 0.1315349)
-## 95CI: -0.09183026  to 0.16490988
+t.test(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<43 & age_risk$DEPARTMENT==2)], sigma.x = 0.04944588)
+## 95CI: 0.02341863 to 0.04965814
 
 #mean risk for 43-55 yo in int med hospital
 mean(age_risk$risk[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTMENT==2)])
@@ -290,7 +322,8 @@ z.test(age_risk$risk[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTME
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTMENT==2)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTMENT==2)])
 ## 0.05466068 SD=0.1022054 (0.0271834 to 0.1681003)
-## 95CI: 0.02858149 to 0.08073988
+t.test(age_risk$risk[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTMENT==2)], sigma.x = 0.1022029)
+## 95CI: 0.02802574 to 0.08129418
 
 #mean risk for 56-64 yo in int med hospital
 mean(age_risk$risk[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTMENT==2)])
@@ -299,7 +332,8 @@ z.test(age_risk$risk[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTME
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTMENT==2)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTMENT==2)])
 ## 0.04340221 SD=0.04011538 (0.0201348 to 0.1618702)
-## 95CI: 0.03298821 to 0.05381620
+t.test(age_risk$risk[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTMENT==2)], sigma.x = 0.04011573)
+## 95CI: 0.03275865 to 0.05404692
 
 #mean risk for 65-84 yo in int med hospital
 mean(age_risk$risk[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTMENT==2)])
@@ -308,7 +342,8 @@ z.test(age_risk$risk[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTME
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTMENT==2)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTMENT==2)])
 ## 0.05149226 SD=0.06536967 (0.02431867 to 0.1767604)
-## 95CI: 0.03389332 to 0.06909119
+t.test(age_risk$risk[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTMENT==2)], sigma.x = 0.06536712)
+## 95CI: 0.03347414 to 0.06950895
 
 library(readxl)
 int_med_age_mean_plot <- read_excel("~/mean for plot.xlsx", sheet = "Age Int Med", col_types = c("text", 
@@ -402,14 +437,22 @@ duration_risk$ID_PATIENT <- as.numeric(duration_risk$ID_PATIENT)
 #box plot for duration by hospital with outliers
 library(ggplot2)
 ggplot(duration_risk, aes(x=Hospital, y=Duration)) + 
-  geom_boxplot(outlier.colour="red", outlier.shape=4, outlier.size=4) + 
+  geom_boxplot(outlier.colour="red", outlier.shape=4, outlier.size=3) + 
   scale_x_discrete(labels=c("Surgery", "Internal med")) +
-  theme(plot.title = element_text(size = 14, 
-                                  face = "bold", hjust = 0.5)) +labs(title = "Duration of Stay by Hospitals", 
-                                                                     x = "Hospitals", y = "Duration (days)") + theme(axis.title = element_text(face = "bold"))
+  theme(plot.title = element_text(size = 14,face = "bold", hjust = 0.5)) +
+  labs(title = "Duration of Stay by Hospitals", x = "Hospitals", y = "Duration (days)") + 
+  theme(axis.title = element_text(face = "bold"))
 
 hist(duration_risk$Duration[which(duration_risk$Hospital==1)])
+mean(duration_risk$Duration[which(duration_risk$Hospital==1)])
+sd(duration_risk$Duration[which(duration_risk$Hospital==1)])
+t.test(duration_risk$Duration[which(duration_risk$Hospital==1)], sigma.x=3.389674)
+# avg = 3.50 days; 95CI: 3.12 - 3.89
 hist(duration_risk$Duration[which(duration_risk$Hospital==2)])
+mean(duration_risk$Duration[which(duration_risk$Hospital==2)])
+sd(duration_risk$Duration[which(duration_risk$Hospital==2)])
+t.test(duration_risk$Duration[which(duration_risk$Hospital==2)], signma.x=4.801544)
+# avg = 6.10 days; 95CI: 5.43 - 6.77
 
 # short stays (less than 5 days)
 # medium stays (5-15 days)
@@ -422,7 +465,7 @@ z.test(duration_risk$risk[which(duration_risk$Duration<5  & duration_risk$Hospit
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration<5 & duration_risk$Hospital==1)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration<5 & duration_risk$Hospital==1)])
 
-t.test(duration_risk$risk[which(duration_risk$Duration<5  & duration_risk$Hospital==1)], sigma.x = 0.009677297)
+t.test(duration_risk$risk[which(duration_risk$Duration<5  & duration_risk$Hospital==1)], sigma.x = 0.967727)
 
 
 #mean risk for medium stay in surgery hospital
@@ -432,7 +475,7 @@ z.test(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duratio
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)])
 
-t.test(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)], sigma.x = 0.03482567)
+t.test(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)], sigma.x = 3.482567)
 
 
 #mean risk for long stay in surgery hospital
@@ -442,7 +485,7 @@ z.test(duration_risk$risk[which(duration_risk$Duration>15  & duration_risk$Hospi
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration>15 & duration_risk$Hospital==1)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration>15 & duration_risk$Hospital==1)])
 
-t.test(duration_risk$risk[which(duration_risk$Duration>15  & duration_risk$Hospital==1)], sigma.x = 0.4127112)
+t.test(duration_risk$risk[which(duration_risk$Duration>15  & duration_risk$Hospital==1)], sigma.x = 41.27107)
 
 
 #mean risk for short stay in internal med hospital
@@ -452,7 +495,7 @@ z.test(duration_risk$risk[which(duration_risk$Duration<5  & duration_risk$Hospit
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration<5 & duration_risk$Hospital==2)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration<5 & duration_risk$Hospital==2)])
 
-t.test(duration_risk$risk[which(duration_risk$Duration<5  & duration_risk$Hospital==2)], sigma.x = 0.03072895)
+t.test(duration_risk$risk[which(duration_risk$Duration<5  & duration_risk$Hospital==2)], sigma.x = 3.072899)
 
 #mean risk for medium stay in internal med hospital
 mean(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)])
@@ -461,7 +504,7 @@ z.test(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duratio
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)])
 
-t.test(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)], sigma.x = 0.0598927)
+t.test(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)], sigma.x = 5.989272)
 
 
 #mean risk for long stay in internal med hospital
@@ -471,7 +514,7 @@ z.test(duration_risk$risk[which(duration_risk$Duration>15  & duration_risk$Hospi
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration>15 & duration_risk$Hospital==2)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration>15 & duration_risk$Hospital==2)])
 
-t.test(duration_risk$risk[which(duration_risk$Duration>15  & duration_risk$Hospital==2)], sigma.x = 0.0993748)
+t.test(duration_risk$risk[which(duration_risk$Duration>15  & duration_risk$Hospital==2)], sigma.x = 9.937487)
 
 
 ## Create plot 
@@ -520,9 +563,17 @@ i=28
 for(i in department){
   dept_mean_plot[i, "departments"] <- department[i]
   dept_mean_plot[i, "mean"] <- mean(dept_risk$risk[which(dept_risk$DEPARTMENT==i)])
+  dept_mean_plot[i, "CIL"] <- {res<- (t.test(dept_risk$risk[which(dept_risk$DEPARTMENT==i)], sigma.x = (sd(dept_risk$risk[which(dept_risk$DEPARTMENT==i)]))))
+  print(res$conf.int[1])
+  }
+  dept_mean_plot[i, "CIU"] <-{res<- (t.test(dept_risk$risk[which(dept_risk$DEPARTMENT==i)], sigma.x = (sd(dept_risk$risk[which(dept_risk$DEPARTMENT==i)]))))
+  print(res$conf.int[2])
+  }
   dept_mean_plot[i, "sens low"] <- mean(dept_risk$`sensitivity low`[which(dept_risk$DEPARTMENT==i)])
   dept_mean_plot[i, "sens high"] <- mean(dept_risk$`sensitivity high`[which(dept_risk$DEPARTMENT==i)])
 }
+
+
 dept_mean_plot$departments=department
 dept_mean_plot$departments <- factor(dept_mean_plot$departments, 
                                levels = c(-1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 
@@ -534,6 +585,9 @@ dept_mean_plot$departments <- factor(dept_mean_plot$departments,
                                           "ICU", "Orthopedics", "General surgery", "ER building", "Neuro surgery",
                                           "Urosurgery", "Burn", "ENT", "Plastic surgery", "OR", "Radiology", 
                                           "Clinical pathology"))
+dept_mean_plot$mean <- round(dept_mean_plot$mean*100, 2)
+dept_mean_plot$CIL <- round(dept_mean_plot$CIL*100, 2)
+dept_mean_plot$CIU <- round(dept_mean_plot$CIU*100, 2)
 
 library(ggplot2)
 ggplot(dept_mean_plot, aes(x=reorder(departments, mean), y=mean))+
@@ -544,7 +598,15 @@ ggplot(dept_mean_plot, aes(x=reorder(departments, mean), y=mean))+
     axis.title = element_text(face = "bold"), 
     plot.title = element_text(size = 15, 
         face = "bold", hjust = 0.5)) +labs(title = "Average risk in departments", x = "Departments", 
-    y = "Average risk")
+    y = "Average risk (%)")
+
+sd(dept_risk$risk[which(dept_risk$DEPARTMENT==1)])
+t.test(dept_risk$risk[which(dept_risk$DEPARTMENT==1)], sigma.x = 0.08938843)
+mean(dept_risk$'sensitivity low'[which(dept_risk$DEPARTMENT==1)])
+mean(dept_risk$'sensitivity high'[which(dept_risk$DEPARTMENT==1)])
+
+res<- (t.test(dept_risk$risk[which(dept_risk$DEPARTMENT==1)], sigma.x = (sd(dept_risk$risk[which(dept_risk$DEPARTMENT==1)]))))
+print(res$conf.int[1])
   
 
 #### Education #####
@@ -592,3 +654,4 @@ sd(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==6)])
 z.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==6)], sigma.x = 0.03715145)
 mean(age_risk$`sensitivity low`[which(educ_risk$EDUCATION_LEVEL==6)])
 mean(age_risk$`sensitivity high`[which(educ_risk$EDUCATION_LEVEL==6)])
+
