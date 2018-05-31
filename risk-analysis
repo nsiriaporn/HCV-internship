@@ -78,6 +78,50 @@ ggplot(admission_mean_plot, aes(x=Admission, y=Mean, fill=Hospital))+
         plot.title = element_text(size = 14, 
                                   face = "bold", hjust = 0.5)) +
   labs(title = "Average risk by admission", x = "Admission", y = "Average risk",fill = "Hospitals")
+  
+#outpatient clinic in both hospital
+sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1)])
+t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1)], sigma.x=6.150445)
+mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==1)])
+mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==1)])
+
+#ER in both hospital
+sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2)])
+t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2)], sigma.x=3.844933)
+mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==2)])
+mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==2)])
+
+#t-test in both admissions
+t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1)], admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2)])
+
+# admission in surgery hospital
+admis_surgery_risk <- admis_hosp_risk[which(admis_hosp_risk$DEPARTMENT==1),]
+
+#outpatient clinic
+sd(admis_surgery_risk$risk[which(admis_surgery_risk$PLACE_RECRUITMENT==1)])
+t.test(admis_surgery_risk$risk[which(admis_surgery_risk$PLACE_RECRUITMENT==1)], sigma.x=1.636612)
+
+#ER
+sd(admis_surgery_risk$risk[which(admis_surgery_risk$PLACE_RECRUITMENT==2)])
+t.test(admis_surgery_risk$risk[which(admis_surgery_risk$PLACE_RECRUITMENT==2)], sigma.x=1.424292)
+
+#t-test between two admission
+t.test(admis_surgery_risk$risk[which(admis_surgery_risk$PLACE_RECRUITMENT==1)], admis_surgery_risk$risk[which(admis_surgery_risk$PLACE_RECRUITMENT==2)])
+
+
+# admission in internal med
+admis_im_risk <- admis_hosp_risk[which(admis_hosp_risk$DEPARTMENT==2),]
+
+#outpatient clinic
+sd(admis_im_risk$risk[which(admis_im_risk$PLACE_RECRUITMENT==1)])
+t.test(admis_im_risk$risk[which(admis_im_risk$PLACE_RECRUITMENT==1)], sigma.x=9.044734)
+
+#ER
+sd(admis_im_risk$risk[which(admis_im_risk$PLACE_RECRUITMENT==2)])
+t.test(admis_im_risk$risk[which(admis_im_risk$PLACE_RECRUITMENT==2)], sigma.x=4.82853)
+
+#t-test between two admission
+t.test(admis_im_risk$risk[which(admis_im_risk$PLACE_RECRUITMENT==1)], admis_im_risk$risk[which(admis_im_risk$PLACE_RECRUITMENT==2)])
 
 #### Gender ####
 #Merge patient_risk with gender data from Patient.Questinnaire
