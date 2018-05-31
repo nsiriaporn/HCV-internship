@@ -3,6 +3,8 @@ Codes for my internship project
 
 #### Trajectory analysis ####
 
+#Patient.Invasive.Procedure from database
+
 # trajectories of departments of patient 1
 print(Patient.Invasive.Procedure$DEPARTMENT[which(Patient.Invasive.Procedure$ID_PATIENT==1)])
 
@@ -30,6 +32,7 @@ prevalence_dept$prevalence[which(prevalence_dept$departments==20)]
 
 
 #### per-procedure risk df ####
+# numbers from literature review and pooled OR on STATA
 pp_risk <- c("endoscopy", "endotracheal intubation", "hemodialysis", "injection", "blood glucose",
              "stitches", "blood sample", "IV catheter", "blood transfusion", "drainage catheter",
              "cardiac catheter", "gastric lavage", "wound dressing")
