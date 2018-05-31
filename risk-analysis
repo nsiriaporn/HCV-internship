@@ -1,5 +1,7 @@
 ### Risk Analysis ###
 
+#df patient_risk created in trajectory analysis
+
 # overall mean
 mean(patient_risk$risk)
 sd(patient_risk$risk)
@@ -7,7 +9,7 @@ mean(patient_risk$`sensitivity low`)
 mean(patient_risk$`sensitivity high`)
 
 #### Hospitals ####
-#Merge patient_risk with admission and hopsital data from Patient.Questinnaire
+#Merge patient_risk with admission and hopsital data from Patient.Questinnaire (data from IMMHoTHep)
 admis_hosp_risk <- merge(x = patient_risk, y = Patient.Questionnaire[ , c("ID_PATIENT","DEPARTMENT", 
                                                                           "PLACE_RECRUITMENT")], by = "ID_PATIENT")
 
@@ -30,7 +32,7 @@ mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$DEPARTMENT==2)])
 #mean risk for outpatient clinic admission in surgery hospital
 mean(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)])
 sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)])
-z.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)], sigma.x = 0.01636614)
+t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)], sigma.x = 0.01636614)
 mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)])
 mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)])
 ## 0.0125163 sd=0.01636614 (0.005737933 to 0.04991165)
@@ -39,7 +41,7 @@ mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT=
 #mean risk for ER admission in surgery hospital
 mean(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)])
 sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)])
-z.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)], sigma.x = 0.01424288)
+t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)], sigma.x = 0.01424288)
 mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)])
 mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)])
 ## 0.01440911 sd=0.01424288 (0.006596508 to 0.0578786)
@@ -48,7 +50,7 @@ mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT=
 #mean risk for outpatient clinic admission in internal medicine hospital
 mean(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)])
 sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)])
-z.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)], sigma.x = 0.09044733)
+t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)], sigma.x = 0.09044733)
 mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)])
 mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)])
 ## 0.04782465 sd=0.09044733 (0.02347702 to 0.150755)
@@ -57,7 +59,7 @@ mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT=
 #mean risk for ER admission in internal medicine hospital
 mean(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)])
 sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)])
-z.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)], sigma.x = 0.04828532)
+t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)], sigma.x = 0.04828532)
 mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)])
 mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)])
 ## 0.04556908 sd=0.04828532 (0.02127116 to 0.1654477)
@@ -108,6 +110,7 @@ sd(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
 mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
 mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
 ## 0.03926806 (0.01834964 to 0.1417573)
+
 #### Age ####
 # look at the distribution of age in each hospital
 hist(Patient.Questionnaire$AGE)
@@ -151,7 +154,7 @@ ggplot(age_risk, aes(x=DEPARTMENT,  y=AGE)) +
 #mean risk for 21-28 yo in surgery hospital
 mean(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<29 & age_risk$DEPARTMENT==1)])
 sd(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<29 & age_risk$DEPARTMENT==1)])
-z.test(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<29 & age_risk$DEPARTMENT==1)], sigma.x = 0.0123)
+t.test(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<29 & age_risk$DEPARTMENT==1)], sigma.x = 0.0123)
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>20 & age_risk$AGE<29 & age_risk$DEPARTMENT==1)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>20 & age_risk$AGE<29 & age_risk$DEPARTMENT==1)])
 ## 0.01341298 SD=0.01233967 (0.00613281 to 0.0542148)
@@ -160,7 +163,7 @@ mean(age_risk$`sensitivity high`[which(age_risk$AGE>20 & age_risk$AGE<29 & age_r
 #mean risk for 29-36 yo in surgery hospital
 mean(age_risk$risk[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTMENT==1)])
 sd(age_risk$risk[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTMENT==1)])
-z.test(age_risk$risk[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTMENT==1)], sigma.x = 0.010288)
+t.test(age_risk$risk[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTMENT==1)], sigma.x = 0.010288)
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTMENT==1)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTMENT==1)])
 ## 0.01186815 SD=0.01028844 (0.005420593 to 0.04825749)
@@ -169,7 +172,7 @@ mean(age_risk$`sensitivity high`[which(age_risk$AGE>28 & age_risk$AGE<37 & age_r
 #mean risk for 37-50 yo in surgery hospital
 mean(age_risk$risk[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTMENT==1)])
 sd(age_risk$risk[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTMENT==1)])
-z.test(age_risk$risk[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTMENT==1)], sigma.x = 0.015045)
+t.test(age_risk$risk[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTMENT==1)], sigma.x = 0.015045)
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTMENT==1)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTMENT==1)])
 ## 0.0111354 SD=0.01504522 (0.005102554 to 0.04456113)
@@ -178,7 +181,7 @@ mean(age_risk$`sensitivity high`[which(age_risk$AGE>36 & age_risk$AGE<51 & age_r
 #mean risk for 51-85 yo in surgery hospital
 mean(age_risk$risk[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTMENT==1)])
 sd(age_risk$risk[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTMENT==1)])
-z.test(age_risk$risk[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTMENT==1)], sigma.x = 0.02125)
+t.test(age_risk$risk[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTMENT==1)], sigma.x = 0.02125)
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTMENT==1)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTMENT==1)])
 ## 0.01726273 SD=0.02125035 (0.007935469 to 0.06781461)
@@ -201,7 +204,7 @@ ggplot(surg_age_mean_plot, aes(x=Group, y=Mean))+
 #mean risk for 21-42 yo in int med hospital
 mean(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<43 & age_risk$DEPARTMENT==2)])
 sd(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<43 & age_risk$DEPARTMENT==2)])
-z.test(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<43 & age_risk$DEPARTMENT==2)], sigma.x = 0.494485)
+t.test(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<43 & age_risk$DEPARTMENT==2)], sigma.x = 0.494485)
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>20 & age_risk$AGE<43 & age_risk$DEPARTMENT==2)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>20 & age_risk$AGE<43 & age_risk$DEPARTMENT==2)])
 ## 0.03653981 SD=0.04944854 (0.0170932 to 0.1315349)
@@ -210,7 +213,7 @@ mean(age_risk$`sensitivity high`[which(age_risk$AGE>20 & age_risk$AGE<43 & age_r
 #mean risk for 43-55 yo in int med hospital
 mean(age_risk$risk[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTMENT==2)])
 sd(age_risk$risk[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTMENT==2)])
-z.test(age_risk$risk[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTMENT==2)], sigma.x = 0.102205)
+t.test(age_risk$risk[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTMENT==2)], sigma.x = 0.102205)
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTMENT==2)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTMENT==2)])
 ## 0.05466068 SD=0.1022054 (0.0271834 to 0.1681003)
@@ -219,7 +222,7 @@ mean(age_risk$`sensitivity high`[which(age_risk$AGE>42 & age_risk$AGE<56 & age_r
 #mean risk for 56-64 yo in int med hospital
 mean(age_risk$risk[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTMENT==2)])
 sd(age_risk$risk[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTMENT==2)])
-z.test(age_risk$risk[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTMENT==2)], sigma.x = 0.040115)
+t.test(age_risk$risk[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTMENT==2)], sigma.x = 0.040115)
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTMENT==2)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTMENT==2)])
 ## 0.04340221 SD=0.04011538 (0.0201348 to 0.1618702)
@@ -228,7 +231,7 @@ mean(age_risk$`sensitivity high`[which(age_risk$AGE>55 & age_risk$AGE<65 & age_r
 #mean risk for 65-84 yo in int med hospital
 mean(age_risk$risk[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTMENT==2)])
 sd(age_risk$risk[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTMENT==2)])
-z.test(age_risk$risk[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTMENT==2)], sigma.x = 0.06536967)
+t.test(age_risk$risk[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTMENT==2)], sigma.x = 0.06536967)
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTMENT==2)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTMENT==2)])
 ## 0.05149226 SD=0.06536967 (0.02431867 to 0.1767604)
@@ -329,42 +332,42 @@ hist(duration_risk$Duration[which(duration_risk$Hospital==2)])
 #mean risk for short stay in surgery hospital
 mean(duration_risk$risk[which(duration_risk$Duration<5 & duration_risk$Hospital==1)])
 sd(duration_risk$risk[which(duration_risk$Duration<5 & duration_risk$Hospital==1)])
-z.test(duration_risk$risk[which(duration_risk$Duration<5  & duration_risk$Hospital==1)], sigma.x = 0.009677297)
+t.test(duration_risk$risk[which(duration_risk$Duration<5  & duration_risk$Hospital==1)], sigma.x = 0.009677297)
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration<5 & duration_risk$Hospital==1)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration<5 & duration_risk$Hospital==1)])
 
 #mean risk for medium stay in surgery hospital
 mean(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)])
 sd(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)])
-z.test(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)], sigma.x = 0.03482567)
+t.test(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)], sigma.x = 0.03482567)
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)])
 
 #mean risk for long stay in surgery hospital
 mean(duration_risk$risk[which(duration_risk$Duration>15 & duration_risk$Hospital==1)])
 sd(duration_risk$risk[which(duration_risk$Duration>15 & duration_risk$Hospital==1)])
-z.test(duration_risk$risk[which(duration_risk$Duration>15  & duration_risk$Hospital==1)], sigma.x = 0.4127112)
+t.test(duration_risk$risk[which(duration_risk$Duration>15  & duration_risk$Hospital==1)], sigma.x = 0.4127112)
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration>15 & duration_risk$Hospital==1)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration>15 & duration_risk$Hospital==1)])
 
 #mean risk for short stay in internal med hospital
 mean(duration_risk$risk[which(duration_risk$Duration<5 & duration_risk$Hospital==2)])
 sd(duration_risk$risk[which(duration_risk$Duration<5 & duration_risk$Hospital==2)])
-z.test(duration_risk$risk[which(duration_risk$Duration<5  & duration_risk$Hospital==2)], sigma.x = 0.03072895)
+t.test(duration_risk$risk[which(duration_risk$Duration<5  & duration_risk$Hospital==2)], sigma.x = 0.03072895)
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration<5 & duration_risk$Hospital==2)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration<5 & duration_risk$Hospital==2)])
 
 #mean risk for medium stay in internal med hospital
 mean(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)])
 sd(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)])
-z.test(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)], sigma.x = 0.0598927)
+t.test(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)], sigma.x = 0.0598927)
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)])
 
 #mean risk for long stay in internal med hospital
 mean(duration_risk$risk[which(duration_risk$Duration>15 & duration_risk$Hospital==2)])
 sd(duration_risk$risk[which(duration_risk$Duration>15 & duration_risk$Hospital==2)])
-z.test(duration_risk$risk[which(duration_risk$Duration>15  & duration_risk$Hospital==2)], sigma.x = 0.0993748)
+t.test(duration_risk$risk[which(duration_risk$Duration>15  & duration_risk$Hospital==2)], sigma.x = 0.0993748)
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration>15 & duration_risk$Hospital==2)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration>15 & duration_risk$Hospital==2)])
 
@@ -486,41 +489,41 @@ educ_risk <- merge(patient_risk, Patient.Questionnaire[ , c("ID_PATIENT","EDUCAT
 #Illiterate
 mean(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==1)])
 sd(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==1)])
-z.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==1)], sigma.x = 0.05631366)
+t.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==1)], sigma.x = 0.05631366)
 mean(age_risk$`sensitivity low`[which(educ_risk$EDUCATION_LEVEL==1)])
 mean(age_risk$`sensitivity high`[which(educ_risk$EDUCATION_LEVEL==1)])
 
 #Can read and write w/o formal education
 mean(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==2)])
 sd(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==2)])
-z.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==2)], sigma.x = 0.07913644)
+t.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==2)], sigma.x = 0.07913644)
 mean(age_risk$`sensitivity low`[which(educ_risk$EDUCATION_LEVEL==2)])
 mean(age_risk$`sensitivity high`[which(educ_risk$EDUCATION_LEVEL==2)])
 
 #Primary school
 mean(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==3)])
 sd(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==3)])
-z.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==3)], sigma.x = 0.04191415)
+t.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==3)], sigma.x = 0.04191415)
 mean(age_risk$`sensitivity low`[which(educ_risk$EDUCATION_LEVEL==3)])
 mean(age_risk$`sensitivity high`[which(educ_risk$EDUCATION_LEVEL==3)])
 
 #Preparatory school
 mean(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==4)])
 sd(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==4)])
-z.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==4)], sigma.x = 0.02097112)
+t.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==4)], sigma.x = 0.02097112)
 mean(age_risk$`sensitivity low`[which(educ_risk$EDUCATION_LEVEL==4)])
 mean(age_risk$`sensitivity high`[which(educ_risk$EDUCATION_LEVEL==4)])
 
 #Secondary school
 mean(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==5)])
 sd(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==5)])
-z.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==5)], sigma.x = 0.02976827)
+t.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==5)], sigma.x = 0.02976827)
 mean(age_risk$`sensitivity low`[which(educ_risk$EDUCATION_LEVEL==5)])
 mean(age_risk$`sensitivity high`[which(educ_risk$EDUCATION_LEVEL==5)])
 
 #Higher education
 mean(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==6)])
 sd(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==6)])
-z.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==6)], sigma.x = 0.03715145)
+t.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==6)], sigma.x = 0.03715145)
 mean(age_risk$`sensitivity low`[which(educ_risk$EDUCATION_LEVEL==6)])
 mean(age_risk$`sensitivity high`[which(educ_risk$EDUCATION_LEVEL==6)])
