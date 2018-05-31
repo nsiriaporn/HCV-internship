@@ -432,6 +432,11 @@ ggplot(alldur_plot, aes(x=reorder(Duration, Mean), y=Mean, group=1))+
         face = "bold", hjust = 0.5)) +labs(title = "Risk by duration of stay", 
     x = "Duration of stay", y = "Risk (%)", 
     caption = "Kruskal-Wallis test: P-value < 0.0001")
+    
+surgery_duration_risk <- duration_risk[which(duration_risk$Hospital==1),]
+write.csv(surgery_duration_risk, file="surgery_duration_risk.csv")
+
+#Kruskal-Wallis test: P-value < 0.0001
 
 #mean risk for short stay in surgery hospital
 mean(duration_risk$risk[which(duration_risk$Duration<5 & duration_risk$Hospital==1)])
@@ -453,6 +458,12 @@ sd(duration_risk$risk[which(duration_risk$Duration>15 & duration_risk$Hospital==
 t.test(duration_risk$risk[which(duration_risk$Duration>15  & duration_risk$Hospital==1)], sigma.x = 0.4127112)
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration>15 & duration_risk$Hospital==1)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration>15 & duration_risk$Hospital==1)])
+
+
+intmed_duration_risk <- duration_risk[which(duration_risk$Hospital==2),]
+write.csv(intmed_duration_risk, file = "intmed_duration_risk.csv")
+
+#Kruskal-Wallis test: P-value = 0.02
 
 #mean risk for short stay in internal med hospital
 mean(duration_risk$risk[which(duration_risk$Duration<5 & duration_risk$Hospital==2)])
