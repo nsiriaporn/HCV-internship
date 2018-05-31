@@ -127,6 +127,21 @@ t.test(admis_im_risk$risk[which(admis_im_risk$PLACE_RECRUITMENT==1)], admis_im_r
 #Merge patient_risk with gender data from Patient.Questinnaire
 gender_risk <- merge(patient_risk, Patient.Questionnaire[ , c("ID_PATIENT","GENDER", "DEPARTMENT")], by = "ID_PATIENT")
 
+#mean risk for males
+mean(gender_risk$risk[which(gender_risk$GENDER==1)]) #0.03083677
+sd(gender_risk$risk[which(gender_risk$GENDER==1)])
+t.test(gender_risk$risk[which(gender_risk$GENDER==1)], sigma.x=0.05776771)
+mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==1)]) #0.01469476
+mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==1)]) #0.107749
+#mean risk for females
+mean(gender_risk$risk[which(gender_risk$GENDER==2)]) #0.02504567
+sd(gender_risk$risk[which(gender_risk$GENDER==2)])
+t.test(gender_risk$risk[which(gender_risk$GENDER==2)], sigma.x=0.03789423)
+mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==2)]) #0.01164233
+mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==2)]) #0.09301156
+t.test(risk ~ GENDER, data=gender_risk) # p-value=0.1768 (not significant)
+t.test(gender_risk$risk[which(gender_risk$GENDER==1)], gender_risk$risk[which(gender_risk$GENDER==2)])
+
 #mean risk for males in surgery hospital
 mean(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==1)])
 sd(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==1)])
@@ -141,6 +156,10 @@ mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==2 & gender_risk$DEP
 mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==1)])
 ## 0.01381118 SD=0.01926646 (0.006344121 to 0.05450655)
 
+#t-test for gender in surgery
+t.test(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==1)], gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==1)])
+# p-value = 0.7652 not significant
+
 #mean risk for males in internal medicine hospital
 mean(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==2)])
 sd(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==2)])
@@ -154,6 +173,10 @@ sd(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
 mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
 mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
 ## 0.03926806 (0.01834964 to 0.1417573)
+
+#t-test for genders in int med
+t.test(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==2)], gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
+# p-value = 0.1511 not significant
 
 #### Age ####
 # look at the distribution of age in each hospital
