@@ -459,6 +459,22 @@ t.test(duration_risk$risk[which(duration_risk$Duration>15  & duration_risk$Hospi
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration>15 & duration_risk$Hospital==1)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration>15 & duration_risk$Hospital==1)])
 
+#plot
+library(readxl)
+surgery_durplot <- read_excel("~/mean for plot.xlsx", sheet = "Duration surgery", 
+                              col_types = c("text","numeric", "numeric", "numeric", "numeric", "numeric"))
+
+library(ggplot2)
+ggplot(surgery_durplot, aes(x=reorder(Duration, Mean), y=Mean, group=1))+
+  geom_line()+geom_point(size=3, shape=20, fill="black")+
+  geom_text(aes(y=Mean, label=Mean, hjust=1.5, vjust=-0.9))+
+  geom_errorbar(aes(ymin=CIL, ymax=CIU), width=.1) + theme(plot.subtitle = element_text(vjust = 1), 
+    plot.caption = element_text(vjust = 1), 
+    axis.title = element_text(face = "bold"), 
+    plot.title = element_text(size = 15, 
+        face = "bold", hjust = 0.5)) +labs(title = "Average risk by duration in surgery hospital", 
+    x = "Duration", y = "Risk (%)", caption = "Kruskal-Wallis test: P-value < 0.0001")
+
 
 intmed_duration_risk <- duration_risk[which(duration_risk$Hospital==2),]
 write.csv(intmed_duration_risk, file = "intmed_duration_risk.csv")
@@ -486,6 +502,23 @@ t.test(duration_risk$risk[which(duration_risk$Duration>15  & duration_risk$Hospi
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration>15 & duration_risk$Hospital==2)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration>15 & duration_risk$Hospital==2)])
 
+#plot
+library(readxl)
+intmed_durplot <- read_excel("~/mean for plot.xlsx", sheet = "Duration int med", 
+                              col_types = c("text","numeric", "numeric", "numeric", "numeric", "numeric"))
+
+library(ggplot2)
+ggplot(intmed_durplot, aes(x=reorder(Duration, Mean), y=Mean, group=1))+
+  geom_line()+geom_point(size=3, shape=20, fill="black")+
+  geom_text(aes(y=Mean, label=Mean, hjust=1.5, vjust=-0.9))+
+  geom_errorbar(aes(ymin=CIL, ymax=CIU), width=.1) +
+  theme(plot.subtitle = element_text(vjust = 1), 
+        plot.caption = element_text(vjust = 1),
+        axis.title = element_text(face = "bold"),
+        plot.title = element_text(size = 15, face = "bold", hjust = 0.5)) +
+  labs(title = "Average risk by duration in internal medicine hospital",x = "Duration", y = "Risk (%)", 
+       caption = "Kruskal-Wallis test: P-value = 0.0203")
+
 ## Create plot 
 # grouping
 attach(duration_risk)
@@ -512,6 +545,20 @@ ggplot(duration_mean_plot, aes(x=Group, y=Mean, fill=Hospital))+
     x = "Duration of stay", y = "Average risk (%)", 
     fill = "Hospitals")
 
+pd <- position_dodge(0.1)
+duration_plot <- ggplot(duration_mean_plot, aes(x=reorder(Group, Mean), y=Mean, group=Hospital))+
+  geom_line(aes(color=Hospital), size=1.5, position=position_dodge(0.1))+geom_point(size=3, shape=20, fill="black", position = position_dodge(0.1))+
+  geom_text(aes(y=Mean, label=Mean, hjust=1.5), position = position_dodge(0.1))+
+  geom_errorbar(aes(ymin=CIL, ymax=CIU), width=.1, position = position_dodge(0.1)) +
+  theme(plot.subtitle = element_text(vjust = 1), 
+        plot.caption = element_text(vjust = 1),
+        axis.title = element_text(face = "bold"),
+        plot.title = element_text(size = 15, face = "bold", hjust = 0.5)) +
+  labs(title = "Average risk by duration of stay",x = "Duration", y = "Risk (%)", caption = "Kruskal-Wallis test: P-value < 0.0001")
+
+
+duration_plot+ scale_color_manual(values=c("#798E87", "#C27D38"))
+#Kruskal-Wallis test on STATA: P-value < 0.0001
 
 #### Departments ####
 dept_risk <- merge(patient_risk, Patient.Trajectories[ , c("ID_PATIENT", "DEPARTMENT")], by = "ID_PATIENT")
