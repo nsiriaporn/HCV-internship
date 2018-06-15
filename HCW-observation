@@ -519,3 +519,48 @@ ggplot(bloodtrans_obs_cumsum[which(bloodtrans_obs_cumsum$value>0 & bloodtrans_ob
   theme(axis.title = element_text(face = "bold"),plot.title = element_text(size = 14,face = "bold", hjust = 0.5)) +
   labs(title = "Infection control procedures observed in blood transfusion procedure", x = "Procedures", y = "Frequency")
  
+ ### compare compliance between surgery and int med ###
+
+#surgery = 1
+HCW_Observation_surg <- HCW_Observation[which(HCW_Observation$HOSPITAL==1),]
+##using tray injection
+table(HCW_Observation_surg$TRAY_INJECTION)
+prop.test(3,18,correct=FALSE)  #16.67% 95CI: 5.84-39.22%
+
+#disinfect blood spilled correctly
+table(HCW_Observation_surg$DISINFECTED_CORRECT)
+binom.test(1,7) #14.29% 95CI: 0.36-57.87%
+
+#int med = 2
+HCW_Observation_intmed <- HCW_Observation[which(HCW_Observation$HOSPITAL==2),]
+##using tray injection
+table(HCW_Observation_intmed$TRAY_INJECTION)
+prop.test(3,14, correct=F)  #21.43% 95CI: 7.57-47.59%
+
+#disinfect blood spilled correctly
+table(HCW_Observation_intmed$DISINFECTED_CORRECT)
+prop.test(3,11, correct=F) #27.27% 95CI: 9.75-56.56%
+
+library(readxl)
+IC_compliance <- read_excel("~/IC compliance.xlsx", 
+                            col_types = c("text", "text", "numeric", "numeric", "numeric", "numeric","numeric", "numeric"))
+# plot
+library(ggplot2)
+library(wesanderson)
+dodge <- position_dodge(width=0.9)
+ggplot(IC_compliance, aes(x=IC, y=compliance, fill=hospital))+
+  geom_text(position=position_dodge(width = 1), aes(y=round(compliance,1), label=round(compliance,1), vjust=-0.5, hjust=1.7))+
+  geom_bar(stat = "identity", position = "dodge")+
+  geom_col(position = dodge)+
+  geom_errorbar(aes(ymin=CIL, ymax=CIU), position = dodge, width=0.25) +
+  scale_fill_manual(values=wes_palette(n=2, name="Moonrise2"))+
+  theme(plot.subtitle = element_text(vjust = 1), 
+        plot.caption = element_text(vjust = 1), 
+        axis.title = element_text(face = "bold"), 
+        plot.title = element_text(size = 14, 
+                                  face = "bold", hjust = 0.5)) +
+  labs(title = "Comparison of compliance rate", x = "Infection control methods", y = "Compliance rate (%)",fill = "Hospitals") + theme(axis.title = element_text(size = 13), 
+    axis.text = element_text(size = 12), 
+    plot.title = element_text(size = 15), 
+    legend.text = element_text(size = 12), 
+    legend.title = element_text(size = 12))
