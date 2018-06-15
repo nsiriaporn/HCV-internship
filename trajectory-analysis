@@ -20,13 +20,16 @@ proc_analysis <- Patient.Invasive.Procedure[, c("ID_PATIENTINVASIVEPROC", "ID_PA
                                                 "DRAINAGECATHETER", "OTHER_INVPROC")]
 View(proc_analysis[which(proc_analysis$ID_PATIENT==4),])
 
+# average procedures per patient
+mean(collapsed_proc$counts) #11 procedure per patient
+sd(collapsed_proc$counts)
+
 # data frame with departments and HCV RNA prevalence
 prevalence_dept <- data.frame(names(table(Trajectory_HCV_S$DEPARTMENT)))
 names(prevalence_dept) <- c("departments")
 prevalence_dept$prevalence <- round(dept.traj.RNA$positive/dept.traj$total, digits = 4)
 #view the probability for the given department
 prevalence_dept$prevalence[which(prevalence_dept$departments==20)]
-
 
 #### per-procedure risk df ####
 # numbers from literature review and pooled OR on STATA
@@ -68,6 +71,7 @@ View(proc_analysis[which(proc_analysis$ID_PATIENT==4),])
   (1-(prevalence_dept$prevalence[which(prevalence_dept$departments==18)])*(pp_risk_df$pp_highsensitivity[which(pp_risk_df$pp_risk=="IV catheter")]))*
   (1-(prevalence_dept$prevalence[which(prevalence_dept$departments==1)])*(pp_risk_df$pp_highsensitivity[which(pp_risk_df$pp_risk=="endoscopy")]))
 #0.04781 = 4.781%
+
 #### create data frame where it shows patients and procedures done ####
 # number of IV cath done for patient 4
 sum(proc_analysis$INTRAVENOUS[which(proc_analysis$ID_PATIENT==4)], na.rm = TRUE)
@@ -91,19 +95,29 @@ patient_procedures <- Patient.Invasive.Procedure[, c("ID_PATIENT", "INTRAVENOUS"
                                                 "ENDOSCOPY", "GASTRIC_LAVAGE", "IUD_INSERTION", "CARDIAC_CATHETER",
                                                 "DIALYSIS", "WOUND_DRESSING", "BLOODGLUCOSE", "ENDOTRACHEALINTU",
                                                 "DRAINAGECATHETER")]
+#rename columns
+colnames(patient_procedures) <- c("ID_PATIENTINVASIVEPROC", "ID_PATIENT", "IV catheter", "stitches", "blood transfusion", 
+                                  "blood sample", "injection", "endoscopy", "gastric lavage", "IUD insertion", "cardiac catheter",
+                                  "hemodialysis", "wound dressing", "blood glucose", "endotracheal intubation",
+                                  "drainage catheter")
+                                  
 library(reshape2)
 mpatient_procedures <- melt(patient_procedures, id=c("ID_PATIENT"), na.rm = T)
 colnames(pp_risk_df)[1] <- "procedures"
 colnames(mpatient_procedures)[3] <- "procedures"
 mpatient_procedures <- merge(mpatient_procedures, pp_risk_df, by="procedures")
+
 #delete value column in mpatient_procedure
 mpatient_procedures$value <- NULL
+
 #merge departments and prevalence into df
 procID_dept <- Patient.Invasive.Procedure[, c("ID_PATIENTINVASIVEPROC", "DEPARTMENT")] #df with just procedure ID and dept
 mpatient_procedures <- merge(mpatient_procedures, procID_dept, by="ID_PATIENTINVASIVEPROC")
 mpatient_procedures <- merge(mpatient_procedures, prevalence_dept, by="DEPARTMENT")
+
 #reorder columns
 mpatient_procedures <- mpatient_procedures[,c(2,4,3,5,6,7,1,8)]
+
 #### create function for formula ####
 riskassessment <- function(x,y){
   product = 1-(x*y)
@@ -115,6 +129,7 @@ riskassessment <- function(x,y){
 #risk assessement for patient 4
 riskassessment(mpatient_procedures$pp_transmission[which(mpatient_procedures$ID_PATIENT==4)],mpatient_procedures$prevalence[which(mpatient_procedures$ID_PATIENT==4)])
 #probablity = 0.01157024
+
 #### Loop for risk analysis and sensitivity analysis ####
 patients <- as.numeric(names(table(Patient.Invasive.Procedure$ID_PATIENT)))
 patient_risk <- data.frame(NULL)
@@ -127,6 +142,7 @@ for(i in patients){
 }
 patient_risk <- patient_risk[-501,]
 patient_risk[which(is.na(patient_risk$`ID_PATIENT`)), "ID_PATIENT"] <- "502"
+
 #check individuals
 #risk
 riskassessment(mpatient_procedures$pp_transmission[which(mpatient_procedures$ID_PATIENT==502)],mpatient_procedures$prevalence[which(mpatient_procedures$ID_PATIENT==502)])
