@@ -518,41 +518,4 @@ ggplot(bloodtrans_obs_cumsum[which(bloodtrans_obs_cumsum$value>0 & bloodtrans_ob
   geom_text(aes(label = value, y = value), position = position_stack(vjust = 0.5), size = 4)+
   theme(axis.title = element_text(face = "bold"),plot.title = element_text(size = 14,face = "bold", hjust = 0.5)) +
   labs(title = "Infection control procedures observed in blood transfusion procedure", x = "Procedures", y = "Frequency")
-  
-  
-##################################
-###  Fisher's test for gloves  ###
-##################################
-gloves <- matrix(c(14,11,11,6,0,0,0,0),
-                 nrow=2,
-                 ncol=4, 
-                 dimnames=
-                   list(c("injection", "wound dressing", "blood sample", "IV catheter"),
-                        c("correct", "incorrect")))
-
-gloves_proc <- c("injection", "wound dressing", "blood sample", "IV catheter")
-gloves_correct <- c(14,11,11,6)
-gloves_incorrect <- c(0,0,0,0)
-gloves_total <- gloves_correct+gloves_incorrect
-gloves <- data.frame(gloves_proc, gloves_correct, gloves_incorrect)
-m <- matrix((gloves), 2)
-fisher.test(m)
-
-m <- matrix(c(14,0,11,0,11,0,6,0), 2)
-fisher.test(m)
-
-##############################################
-###  Fisher's test for disposal container  ###
-##############################################
-
-disposal_correct <- c(14, 0, 10, 3)
-disposal_incorrect <- c(0, 0, 1, 1)
-disposal_total <- c(14, 0, 11, 4)
-fisher.test(disposal_correct, disposal_incorrect)
-
-disposal <- matrix(c(14,0,13,2),
-                 nrow=2,
-                 dimnames=
-                   list(c("injection wound dressing", "blood sample  IV catheter"),
-                        c("correct", "incorrect")))
-
+ 
