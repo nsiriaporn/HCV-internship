@@ -19,7 +19,6 @@ procedures_only <- Patient.Invasive.Procedure [, c("INTRAVENOUS","SUTURES", "BLO
 library(stargazer)
 stargazer(procedures_only, type= "text", title="Desciptive statistics", digits=1, mean.sd=FALSE, min.max = FALSE, out = "procedure_observation2.htm")
 
-#Graph
 
 ############################################################
 ##   No. of invasive procedure by place and departments   ##
