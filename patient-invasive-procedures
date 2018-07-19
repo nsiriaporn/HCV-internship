@@ -1,7 +1,9 @@
+Sys.setenv(LANG="en") 
+
 #load data
 library(readxl)
-Patient.Invasive.Procedure <- read.csv("C:/Users/Jung/Desktop/Final extractions/Patient Invasive Procedure (added).csv", sep=";")
-Patient.Questionnaire <- read.csv("C:/Users/Jung/Desktop/Final extractions/Patient.csv", sep=";")
+Patient.Invasive.Procedure <- read.csv("C:/Users/Jung/Desktop/Extraction 2018_07_06/Patient Invasive Procedure.csv", sep=";")
+
 
 #Describe data
 str(Patient.Invasive.Procedure)
@@ -27,64 +29,56 @@ stargazer(procedures_only, type= "text", title="Desciptive statistics", digits=1
 #invasive procedure within each hospital
 table(Patient.Invasive.Procedure$PLACE_PROCEDURE)
 
-#bar plot
-place_procedure_counts <- table(Patient.Invasive.Procedure$PLACE_PROCEDURE)
-plot1 <- barplot(place_procedure_counts, main="Patient Invasive Procedures in Hospitals", las=2, 
-                 ylab="Frequency", ylim = c(0,3000), 
-                 names.arg=c("N/A", "Surgery hospital", "Internal med hospital", "ER", 
-                             "Outpatient clinic"))
-text(plot1,place_procedure_counts, labels=as.character(place_procedure_counts), adj = c(0.5,-0.5)
-     , font=2, cex = 1.2) #add value
-
-
 #use ggplot2 
 library(ggplot2)
 #put into data frame
-place_procedure_counts_gg<- data.frame(table(Patient.Invasive.Procedure$PLACE_PROCEDURE)) 
+place_procedure_counts<- data.frame(table(Patient.Invasive.Procedure$PLACE_PROCEDURE)) 
 #name collumns
-colnames(place_procedure_counts_gg) <- c("Hospitals", "Freq")
+colnames(place_procedure_counts) <- c("Hospitals", "Freq")
 #label
-place_procedure_counts_gg$Hospitals <- factor(place_procedure_counts_gg$Hospitals,
-                                           levels = c(-1, 1, 2, 3, 4), 
-                                           labels = c("Data not available", "Surgery hospital", 
-                                                      "Internal medicine hospital", "Emergency room", "Outpatient clinic"))
+place_procedure_counts$Hospitals <- factor(place_procedure_counts$Hospitals,
+                                              levels = c(-1, 1, 2, 3, 4), 
+                                              labels = c("Data not available", "Surgery hospital", 
+                                                         "Internal medicine hospital", "Emergency room", "Outpatient clinic"))
 #make bar graph with labels and number frequency
-plot1.2 <- ggplot(data=place_procedure_counts_gg, aes(x=Hospitals, y=Freq)) + geom_bar(stat="identity")+
+ggplot(data=place_procedure_counts, aes(x=Hospitals, y=Freq)) + geom_bar(stat="identity")+
   labs(title="Number of invasive procedures in the hospitals", x="Hospitals", y="Number of procedures") + 
   geom_text(aes(y=Freq-0.5, label=Freq), size=5, vjust=-0.2) + 
   theme(axis.title = element_text(size = 13, face = "bold"), axis.text = element_text(size = 11), 
-  plot.title = element_text(size = 15, face = "bold", hjust = 0.5), strip.text = element_text(size = 9)) + 
+        plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+        strip.text = element_text(size = 9)) + 
   theme(axis.text = element_text(size = 8))
 
-####  Invasive procedure counts in surgery and int med hospitals #### we don't want admission in here
+####  Invasive procedure counts in surgery and int med hospitals ####
 place1.2_procedure <- Patient.Invasive.Procedure [which(Patient.Invasive.Procedure$PLACE_PROCEDURE==1|
                                                           Patient.Invasive.Procedure$PLACE_PROCEDURE==2),]
 
 
-#invasive procedure within each department (place 1 and 2 (surgery and int med))
+#invasive procedure within each department (place 1 and 2)
 table(place1.2_procedure$DEPARTMENT)
 #bar plot
 dept_procedure_counts <- data.frame(table(place1.2_procedure$DEPARTMENT))
 colnames(dept_procedure_counts) <- c("Departments", "Freq")
 #label
 dept_procedure_counts$Departments <- factor(dept_procedure_counts$Departments,
-                                           levels = c(-1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, 24, 25, 26, 27), 
-                                           labels = c("Data not available", "GIT and endoscopy", "Endocrinology", "Immunology and allergy",
-                                                      "Hematology", "Rheumatology", "Geiatric", "Chest", "Nephrology", "Cardiology",
-                                                      "Cardiac catheterization", "Neurology", "Tropical", "Ophthalmology", "Dialysis",
-                                                      "ICU", "Orthopedics", "General surgery", "ER building", "Neuro surgery", "Urosurgery",
-                                                      "Plastic surgery", "OR", "Radiology", "Clinical pathology"))
+                                            levels = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 
+                                                       23, 24, 25, 26, 27,28,29,30), 
+                                            labels = c("GIT and endoscopy 1&2", "Endocrinology", "Immunology and allergy",
+                                                       "Hematology", "Rheumatology", "Geiatric", "Chest", "Nephrology", "Cardiology",
+                                                       "Cardiac catheterization", "Neurology", "Tropical", "Dermatology", "Ophthalmology", 
+                                                       "Dialysis", "ICU", "Orthopedics", "General surgery", "ER building", "Neuro surgery",
+                                                       "Urosurgery", "Burn", "ENT", "Plastic surgery", "OR", "Radiology", "Clinical pathology",
+                                                       "Endoscopy", "Physical medicine", "ER"))
 #plot bar graph
-plot2 <- ggplot(data=dept_procedure_counts, aes(x=reorder(Departments, Freq), y=Freq)) +geom_bar(stat="identity")+
+ggplot(data=dept_procedure_counts, aes(x=reorder(Departments, Freq), y=Freq)) +geom_bar(stat="identity")+
   labs(title="Number of invasive procedures in the departments", x="Departments", y="Number of procedures") + 
   coord_flip() + geom_text(aes(y=Freq-0.5, label=Freq), size=3, hjust=-0.3)+ 
   theme(axis.line = element_line(size = 0.5), 
-    axis.ticks = element_line(size = 0.7), 
-    axis.title = element_text(size = 12, 
-        face = "bold"), axis.text.y = element_text(size = 9, 
-        vjust = 0), plot.title = element_text(size = 15, 
-        face = "bold", hjust = 0.5), strip.background = element_rect(colour = NA, 
-        size = 1.5), strip.text = element_text(family = "mono"))
+        axis.ticks = element_line(size = 0.7), 
+        axis.title = element_text(size = 12,face = "bold"), 
+        axis.text.y = element_text(size = 9, vjust = 0), 
+        plot.title = element_text(size = 15, face = "bold", hjust = 0.5), 
+        strip.background = element_rect(colour = NA, size = 1.5), strip.text = element_text(family = "mono"))
 
 
 
@@ -98,13 +92,13 @@ colSums(procedure_in_surgery, na.rm=TRUE)
 # Create data frame
 procedure_surgery <- setNames(nm=c('Procedures','Frequency'),stack(colSums(procedure_surgery, na.rm=TRUE))[2:1])
 procedure_surgery$Procedures <- c("Intravenous Catheter","Sutures", "Blood transfusion", "Blood sample", "Injection",
-                         "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
-                         "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
+                                  "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
+                                  "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
 procedure_surgery_z <- procedure_surgery[which(procedure_surgery$Frequency>0),]
 
 ### Bar chart
 plot7  <- ggplot(procedure_surgery_z, aes(x=reorder(procedure_surgery_z$Procedures,procedure_surgery_z$Frequency), 
-                                             y=procedure_surgery_z$Frequency)) + 
+                                          y=procedure_surgery_z$Frequency)) + 
   geom_bar(stat="identity") +labs(title="Surgery hospital (Total = 1792)", x="Procedures", y="Frequency")+
   coord_flip() + geom_text(aes(y=procedure_surgery_z$Frequency, label=procedure_surgery_z$Frequency), size=3, hjust=-0.3)+
   theme(axis.title = element_text(face = "bold"),plot.title = element_text(face = "bold", hjust = 0.5))
@@ -118,20 +112,17 @@ colSums(procedure_int_med, na.rm=TRUE)
 ### Create data frame
 procedure_int_med <- setNames(nm=c('Procedures','Frequency'),stack(colSums(procedure_int_med, na.rm=TRUE))[2:1])
 procedure_int_med$Procedures <- c("Intravenous Catheter","Sutures", "Blood transfusion", "Blood sample", "Injection",
-                                     "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
-                                     "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
+                                  "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
+                                  "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
 procedure_int_med_z <- procedure_int_med[which(procedure_int_med$Frequency>0),]
 
 ### Bar chart
 plot8 <- ggplot(procedure_int_med_z, aes(x=reorder(procedure_int_med_z$Procedures,procedure_int_med_z$Frequency), 
-                                            y=procedure_int_med_z$Frequency)) + 
+                                         y=procedure_int_med_z$Frequency)) + 
   geom_bar(stat="identity") +labs(title="Internal medicine hospital (Total = 2560)", x="Procedures", y="Frequency")+
   coord_flip() + geom_text(aes(y=procedure_int_med_z$Frequency, label=procedure_int_med_z$Frequency), size=3, hjust=-0.3)+
   theme(axis.title = element_text(face = "bold"),plot.title = element_text(face = "bold", hjust = 0.5))
 
-############ COMBINE SURGERY AND INT MED PLOTS ##############
-library(gridExtra)
-grid.arrange(plot7, plot8, nrow=1, top="Invasive procedures in surgery and internal medicine hospital")
 
 ##################################################
 ## Types of Invasive procedures in ER Building  ##
@@ -142,62 +133,62 @@ colSums(ER_building, na.rm=TRUE)
 ### Create data frame
 Procedure_ER_building <- setNames(nm=c('Procedures','Frequency'),stack(colSums(Procedure_ER_building, na.rm=TRUE))[2:1])
 Procedure_ER_building$Procedures <- c("Intravenous Catheter","Sutures", "Blood transfusion", "Blood sample", "Injection",
-                                     "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
-                                     "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
+                                      "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
+                                      "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
 Procedure_ER_building_z <- Procedure_ER_building[which(Procedure_ER_building$Frequency>0),]
 
 
 ### Bar chart
 plot9 <- ggplot(Procedure_ER_building_z, aes(x=reorder(Procedure_ER_building_z$Procedures,Procedure_ER_building_z$Frequency), 
-                                         y=Procedure_ER_building_z$Frequency)) + 
+                                             y=Procedure_ER_building_z$Frequency)) + 
   geom_bar(stat="identity") +labs(title="ER Building (Total = 282)", x="Procedures", y="Frequency")+
   coord_flip() + geom_text(aes(y=Procedure_ER_building_z$Frequency, label=Procedure_ER_building_z$Frequency), size=3, hjust=-0.3)+
   theme(axis.title = element_text(face = "bold"),plot.title = element_text(face = "bold", hjust = 0.5))
-  theme(plot.title = element_text(hjust = 0.5))
+theme(plot.title = element_text(hjust = 0.5))
 
 #########################################
 ## Types of Invasive procedures in ICU ##
 #########################################
 procedure_ICU <- procedures_only [which(Patient.Invasive.Procedure$DEPARTMENT==16),]
-  
+
 colSums(procedure_ICU, na.rm=TRUE)
 ### Create data frame
 procedure_ICU <- setNames(nm=c('Procedures','Frequency'),stack(colSums(procedure_ICU, na.rm=TRUE))[2:1])
 procedure_ICU$Procedures <- c("Intravenous Catheter","Sutures", "Blood transfusion", "Blood sample", "Injection",
-                                        "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
-                                        "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
+                              "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
+                              "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
 procedure_ICU_z <- procedure_ICU[which(procedure_ICU$Frequency>0),]
-  
+
 ### Bar chart
 plot10 <- ggplot(procedure_ICU_z, aes(x=reorder(procedure_ICU_z$Procedures,procedure_ICU_z$Frequency), 
-                                               y=procedure_ICU_z$Frequency)) + 
+                                      y=procedure_ICU_z$Frequency)) + 
   geom_bar(stat="identity") +labs(title="ICU (Total = 197)", x="Procedures", y="Frequency")+
   coord_flip() + geom_text(aes(y=procedure_ICU_z$Frequency, label=procedure_ICU_z$Frequency), size=3, hjust=-0.3)+
   theme(axis.title = element_text(face = "bold"),plot.title = element_text(face = "bold", hjust = 0.5))
-  theme(plot.title = element_text(hjust = 0.5))
-  
-  
+theme(plot.title = element_text(hjust = 0.5))
+
+
 ######################################################
 ## Types of Invasive procedures in General surgery  ##
 ######################################################
 Procedure_gen_surgery <- procedures_only [which(Patient.Invasive.Procedure$DEPARTMENT==18),]
-  
+
 colSums(Procedure_gen_surgery, na.rm=TRUE)
 ### Create data frame
 Procedure_gen_surgery <- setNames(nm=c('Procedures','Frequency'),stack(colSums(Procedure_gen_surgery, na.rm=TRUE))[2:1])
 Procedure_gen_surgery$Procedures <- c("Intravenous Catheter","Sutures", "Blood transfusion", "Blood sample", "Injection",
-                                        "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
-                                        "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
+                                      "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
+                                      "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
 Procedure_gen_surgery_z <- Procedure_gen_surgery[which(Procedure_gen_surgery$Frequency>0),]
-  
-  
+
+
 ### Bar chart
 plot11 <- ggplot(Procedure_gen_surgery_z, aes(x=reorder(Procedure_gen_surgery_z$Procedures,Procedure_gen_surgery_z$Frequency), 
-                                               y=Procedure_gen_surgery_z$Frequency)) + 
-    geom_bar(stat="identity") +labs(title="General surgery (Total = 295)", x="Procedures", y="Frequency")+
-    coord_flip() + geom_text(aes(y=Procedure_gen_surgery_z$Frequency, label=Procedure_gen_surgery_z$Frequency), size=3, hjust=-0.3)+
-    theme(axis.title = element_text(face = "bold"),plot.title = element_text(face = "bold", hjust = 0.5))
-  
+                                              y=Procedure_gen_surgery_z$Frequency)) + 
+  geom_bar(stat="identity") +labs(title="General surgery (Total = 295)", x="Procedures", y="Frequency")+
+  coord_flip() + geom_text(aes(y=Procedure_gen_surgery_z$Frequency, label=Procedure_gen_surgery_z$Frequency), size=3, hjust=-0.3)+
+  theme(axis.title = element_text(face = "bold"),plot.title = element_text(face = "bold", hjust = 0.5))
+
 
 #################################################
 ## Types of Invasive procedures in Orthopedics ##
@@ -208,14 +199,14 @@ colSums(Procedure_ortho, na.rm=TRUE)
 ### Create data frame
 Procedure_ortho <- setNames(nm=c('Procedures','Frequency'),stack(colSums(Procedure_ortho, na.rm=TRUE))[2:1])
 Procedure_ortho$Procedures <- c("Intravenous Catheter","Sutures", "Blood transfusion", "Blood sample", "Injection",
-                                      "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
-                                      "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
+                                "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
+                                "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
 Procedure_ortho_z <- Procedure_ortho[which(Procedure_ortho$Frequency>0),]
 
 
 ### Bar chart
 plot12 <- ggplot(Procedure_ortho_z, aes(x=reorder(Procedure_ortho_z$Procedures,Procedure_ortho_z$Frequency), 
-                                              y=Procedure_ortho_z$Frequency)) + 
+                                        y=Procedure_ortho_z$Frequency)) + 
   geom_bar(stat="identity") +labs(title="Orthopedics (Total = 592)", x="Procedures", y="Frequency")+
   coord_flip() + geom_text(aes(y=Procedure_ortho_z$Frequency, label=Procedure_ortho_z$Frequency), size=3, hjust=-0.3)+
   theme(axis.title = element_text(face = "bold"),plot.title = element_text(face = "bold", hjust = 0.5))
@@ -236,14 +227,14 @@ colSums(Procedure_urosurg, na.rm=TRUE)
 ### Create data frame
 Procedure_urosurg <- setNames(nm=c('Procedures','Frequency'),stack(colSums(Procedure_urosurg, na.rm=TRUE))[2:1])
 Procedure_urosurg$Procedures <- c("Intravenous Catheter","Sutures", "Blood transfusion", "Blood sample", "Injection",
-                                "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
-                                "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
+                                  "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
+                                  "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
 Procedure_urosurg_z <- Procedure_urosurg[which(Procedure_urosurg$Frequency>0),]
 
 
 ### Bar chart
 plot_uros <- ggplot(Procedure_urosurg_z, aes(x=reorder(Procedure_urosurg_z$Procedures,Procedure_urosurg_z$Frequency), 
-                                        y=Procedure_urosurg_z$Frequency)) + 
+                                             y=Procedure_urosurg_z$Frequency)) + 
   geom_bar(stat="identity") +labs(title="Urosurgery (Total = 9)", x="Procedures", y="Frequency")+
   coord_flip() + geom_text(aes(y=Procedure_urosurg_z$Frequency, label=Procedure_urosurg_z$Frequency), size=3, hjust=-0.3)+
   theme(axis.title = element_text(face = "bold"),plot.title = element_text(face = "bold", hjust = 0.5))
@@ -258,14 +249,14 @@ colSums(Procedure_tropical, na.rm=TRUE)
 ### Create data frame
 Procedure_tropical <- setNames(nm=c('Procedures','Frequency'),stack(colSums(Procedure_tropical, na.rm=TRUE))[2:1])
 Procedure_tropical$Procedures <- c("Intravenous Catheter","Sutures", "Blood transfusion", "Blood sample", "Injection",
-                                  "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
-                                  "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
+                                   "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
+                                   "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
 Procedure_tropical_z <- Procedure_tropical[which(Procedure_tropical$Frequency>0),]
 
 
 ### Bar chart
 plot_trop <- ggplot(Procedure_tropical_z, aes(x=reorder(Procedure_tropical_z$Procedures,Procedure_tropical_z$Frequency), 
-                                             y=Procedure_tropical_z$Frequency)) + 
+                                              y=Procedure_tropical_z$Frequency)) + 
   geom_bar(stat="identity") +labs(title="Tropical (Total = 296)", x="Procedures", y="Frequency")+
   coord_flip() + geom_text(aes(y=Procedure_tropical_z$Frequency, label=Procedure_tropical_z$Frequency), size=3, hjust=-0.3)+
   theme(axis.title = element_text(face = "bold"),plot.title = element_text(face = "bold", hjust = 0.5))
@@ -280,14 +271,14 @@ colSums(Procedure_GITendo, na.rm=TRUE)
 ### Create data frame
 Procedure_GITendo <- setNames(nm=c('Procedures','Frequency'),stack(colSums(Procedure_GITendo, na.rm=TRUE))[2:1])
 Procedure_GITendo$Procedures <- c("Intravenous Catheter","Sutures", "Blood transfusion", "Blood sample", "Injection",
-                                   "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
-                                   "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
+                                  "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
+                                  "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
 Procedure_GITendo_z <- Procedure_GITendo[which(Procedure_GITendo$Frequency>0),]
 
 
 ### Bar chart
 plot_git <- ggplot(Procedure_GITendo_z, aes(x=reorder(Procedure_GITendo_z$Procedures,Procedure_GITendo_z$Frequency), 
-                                              y=Procedure_GITendo_z$Frequency)) + 
+                                            y=Procedure_GITendo_z$Frequency)) + 
   geom_bar(stat="identity") +labs(title=" GIT & Endoscopy 1&2 (total = 181)", x="Procedures", y="Frequency")+
   coord_flip() + geom_text(aes(y=Procedure_GITendo_z$Frequency, label=Procedure_GITendo_z$Frequency), size=3, hjust=-0.3)+
   theme(axis.title = element_text(face = "bold"),plot.title = element_text(face = "bold", hjust = 0.5))
@@ -302,14 +293,14 @@ colSums(Procedure_neuros, na.rm=TRUE)
 ### Create data frame
 Procedure_neuros <- setNames(nm=c('Procedures','Frequency'),stack(colSums(Procedure_neuros, na.rm=TRUE))[2:1])
 Procedure_neuros$Procedures <- c("Intravenous Catheter","Sutures", "Blood transfusion", "Blood sample", "Injection",
-                                  "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
-                                  "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
+                                 "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
+                                 "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
 Procedure_neuros_z <- Procedure_neuros[which(Procedure_neuros$Frequency>0),]
 
 
 ### Bar chart
 plot_neuros <- ggplot(Procedure_neuros_z, aes(x=reorder(Procedure_neuros_z$Procedures,Procedure_neuros_z$Frequency), 
-                                            y=Procedure_neuros_z$Frequency)) + 
+                                              y=Procedure_neuros_z$Frequency)) + 
   geom_bar(stat="identity") +labs(title="Neuro surgery (total = 29)", x="Procedures", y="Frequency")+
   coord_flip() + geom_text(aes(y=Procedure_neuros_z$Frequency, label=Procedure_neuros_z$Frequency), size=3, hjust=-0.3)+
   theme(axis.title = element_text(face = "bold"),plot.title = element_text(face = "bold", hjust = 0.5))
@@ -323,14 +314,14 @@ colSums(Procedure_geriatric, na.rm=TRUE)
 ### Create data frame
 Procedure_geriatric <- setNames(nm=c('Procedures','Frequency'),stack(colSums(Procedure_geriatric, na.rm=TRUE))[2:1])
 Procedure_geriatric$Procedures <- c("Intravenous Catheter","Sutures", "Blood transfusion", "Blood sample", "Injection",
-                                 "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
-                                 "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
+                                    "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
+                                    "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
 Procedure_geriatric_z <- Procedure_geriatric[which(Procedure_geriatric$Frequency>0),]
 
 
 ### Bar chart
 plot_geriatric <- ggplot(Procedure_geriatric_z, aes(x=reorder(Procedure_geriatric_z$Procedures,Procedure_geriatric_z$Frequency), 
-                                              y=Procedure_geriatric_z$Frequency)) + 
+                                                    y=Procedure_geriatric_z$Frequency)) + 
   geom_bar(stat="identity") +labs(title="Geriatric (total = 91)", x="Procedures", y="Frequency")+
   coord_flip() + geom_text(aes(y=Procedure_geriatric_z$Frequency, label=Procedure_geriatric_z$Frequency), size=3, hjust=-0.3)+
   theme(axis.title = element_text(face = "bold"),plot.title = element_text(face = "bold", hjust = 0.5))
@@ -344,14 +335,14 @@ colSums(Procedure_dialysis, na.rm=TRUE)
 ### Create data frame
 Procedure_dialysis <- setNames(nm=c('Procedures','Frequency'),stack(colSums(Procedure_dialysis, na.rm=TRUE))[2:1])
 Procedure_dialysis$Procedures <- c("Intravenous Catheter","Sutures", "Blood transfusion", "Blood sample", "Injection",
-                                    "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
-                                    "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
+                                   "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
+                                   "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
 Procedure_dialysis_z <- Procedure_dialysis[which(Procedure_dialysis$Frequency>0),]
 
 
 ### Bar chart
 plot_dialysis <- ggplot(Procedure_dialysis_z, aes(x=reorder(Procedure_dialysis_z$Procedures,Procedure_dialysis_z$Frequency), 
-                                                    y=Procedure_dialysis_z$Frequency)) + 
+                                                  y=Procedure_dialysis_z$Frequency)) + 
   geom_bar(stat="identity") +labs(title="Dialysis (total = 13)", x="Procedures", y="Frequency")+
   coord_flip() + geom_text(aes(y=Procedure_dialysis_z$Frequency, label=Procedure_dialysis_z$Frequency), size=3, hjust=-0.3)+
   theme(axis.title = element_text(face = "bold"),plot.title = element_text(face = "bold", hjust = 0.5))
@@ -367,14 +358,14 @@ grid.arrange(plot_uros, plot_trop, plot_git, plot_neuros, nrow=2, top= "Procedur
 colSums(Patient.Invasive.Procedure[18:31], na.rm=TRUE) 
 Procedure_overall <- setNames(nm=c('Procedures','Frequency'),stack(colSums(Patient.Invasive.Procedure[18:31], na.rm=TRUE))[2:1])
 Procedure_overall$Procedures <- c("Intravenous Catheter","Sutures", "Blood transfusion", "Blood sample", "Injection",
-                                    "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
-                                    "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
+                                  "Endoscopy", "Gastric lavage", "IUD insertion","Cardiac Catheter", "Dialysis",
+                                  "Wound dressing","Blood glucose","Endotracheal intubation","Drainage catheter")
 Procedure_overall_z <- Procedure_overall[which(Procedure_overall$Frequency>0),]
 
 
 ### Bar chart
 plot_allprocedures <- ggplot(Procedure_overall_z, aes(x=reorder(Procedure_overall_z$Procedures,Procedure_overall_z$Frequency), 
-                                                    y=Procedure_overall_z$Frequency)) + 
+                                                      y=Procedure_overall_z$Frequency)) + 
   geom_bar(stat="identity") +labs(title="Overall Invasive Procedures (total = 4989)", x="Procedures", y="Frequency")+
   coord_flip() + geom_text(aes(y=Procedure_overall_z$Frequency, label=Procedure_overall_z$Frequency), size=3, hjust=-0.3)+
   theme(axis.title = element_text(face = "bold"),plot.title = element_text(face = "bold", hjust = 0.5))
