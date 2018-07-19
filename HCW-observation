@@ -1,74 +1,54 @@
 #load data
-HCW_Observation <- read.csv("C:/Users/Jung/Desktop/Final extractions/HealthCare Observations.csv", sep=";")
+HCW_Observation <- read.csv("C:/Users/Jung/Desktop/Extraction 2018_07_06/HealthCare Observations.csv", sep=";")
 
 
 #Profession breakdown by observation
 table(HCW_Observation$PROFESSION)
 
-##Observations of procedures
+##Observations of procedures done correctly
 #Washed hands
 table(HCW_Observation$WASHED_HAND)
 
 #Wear gloves
 table(HCW_Observation$GLOVES)
-prop.test(63,67,correct = FALSE)
+prop.test(64,88,correct = FALSE)
 
 #Wear other PPE
 table(HCW_Observation$PPE)
 
 #Use of tray injection
 table(HCW_Observation$TRAY_INJECTION)
-prop.test(18,32,correct=FALSE)
+prop.test(17,34,correct=FALSE)
 
 #Use of prefilled devices
 table(HCW_Observation$PREFILLED_DEVICES)
-prop.test(29,33,correct=FALSE)
+prop.test(30,34,correct=FALSE)
 
 #wipe vial diaphragms with alcohol
 table(HCW_Observation$DIAPHRAGMS_ALCOHOL)
-prop.test(1,3, correct=FALSE)
-binom.test(1,3)
+prop.test(1,1, correct=FALSE)
+binom.test(1,1)
 
 #syringe/needle left in diaphragms of medication vials
 table(HCW_Observation$VIALS_ACCESS)
-prop.test(6,6,correct = FALSE)
+prop.test(5,5,correct = FALSE)
 
 #syringe/other tools broken before disposal
 table(HCW_Observation$DEVICES_USED)
-prop.test(21,27,correct = FALSE)
+prop.test(27,31,correct = FALSE)
 
 #use of disposal container for sharps
 table(HCW_Observation$CONTAINER_SHARP)
-prop.test(30,32,correct = FALSE)
+prop.test(29,33,correct = FALSE)
 
 #use of red bag for hazardous waste/gloves
 table(HCW_Observation$RED_BAG)
-prop.test(60,63,correct = FALSE)
+prop.test(59,64,correct = FALSE)
 
 #disinfect blood spilled correctly
 table(HCW_Observation$DISINFECTED_CORRECT)
-prop.test(4,18,correct = FALSE)
+prop.test(4,15,correct = FALSE)
 
-##CONTAMINATION TO HCW
-#Prick injury
-table(HCW_Observation$PRICK_INJURY)
-prop.test(1,67,correct = FALSE)
-
-#Sharp injury
-table(HCW_Observation$CUT_SHARP)
-prop.test(1,67,correct = FALSE)
-
-#contact w/ blood
-table(HCW_Observation$SKIN_CONTACT_BLOOD)
-prop.test(0,67,correct = FALSE)
-
-#contact w/ mucous membranes
-table(HCW_Observation$SKIN_CONTACT_MUCOUS)
-prop.test(0,67,correct = FALSE)
-
-#contact w/ bodily fluids
-table(HCW_Observation$SKIN_CONTACT_FLUIDS)
-prop.test(0,67,correct = FALSE)
 
 #######################################
 # stack bar graph for IC observation  #
@@ -76,8 +56,8 @@ prop.test(0,67,correct = FALSE)
 IC_obs <- c('wears gloves', 'use tray injection', 'use prefilled device', 'wipe access diaphragm with alcohol','did not leave syringe in diaphragm',
             'syringe intact before disposal', 'use sharp disposal container', 'use red bag for hazardous waste',
             'disinfect spills')
-IC_correct <- c(63, 18, 29, 1, 6, 21, 30, 60, 4)
-IC_incorrect <- c(4, 14, 4, 2, 0, 6, 2, 3, 14)
+IC_correct <- c(64, 17, 30, 1, 5, 27, 29, 59, 4)
+IC_incorrect <- c(24, 17, 4, 0, 0, 4, 4, 5, 11)
 IC_total <- IC_correct+IC_incorrect
 library(reshape2)
 IC_obs_df <- melt(data.frame(IC_obs, IC_correct, IC_incorrect), id.vars="IC_obs")  #make data frame wide
@@ -106,7 +86,7 @@ plot5 <- ggplot(IC_obs_cumsum, aes(x=IC_obs, value, fill=variable)) +
 
 #Percentage but no label
 library(scales)
-plot5_perc <- ggplot(IC_obs_cumsum,aes(x = IC_obs, y = value,fill = variable)) + 
+ggplot(IC_obs_cumsum,aes(x = IC_obs, y = value,fill = variable)) + 
   geom_bar(position = "fill",stat = "identity") + coord_flip() +
   scale_y_continuous(labels = percent_format())+
   scale_fill_manual(values=wes_palette(n=2, name="Moonrise2"), 
@@ -125,8 +105,8 @@ plot5_perc <- ggplot(IC_obs_cumsum,aes(x = IC_obs, y = value,fill = variable)) +
 ## Observed procedures ##
 #########################
 apply(HCW_Observation[c("INTRAVENOUS","SUTURES", "BLOOD_TRANSFUSION", "BLOOD_SAMPLE", "INJECTION",
-                             "ENDOSCOPY", "GASTRIC_LAVAGE", "IUD_INSERTION","CARDIAC_CATHETER", "DIALYSIS",
-                             "WOUND_DRESSING")], 2, table)
+                        "ENDOSCOPY", "GASTRIC_LAVAGE", "IUD_INSERTION","CARDIAC_CATHETER", "DIALYSIS",
+                        "WOUND_DRESSING")], 2, table)
 obs_procedures <- c("Intravenous catheter","Sutures", "Blood transfusion", "Blood sample", "Injection", "Wound dressing")
 obs_procedures_counts <- c(6,2,1,11,14,11)
 obs_procedures_df <- data.frame(obs_procedures, obs_procedures_counts)
@@ -150,7 +130,7 @@ table(obs_injection$GLOVES)
 prop.test(14,14,correct = FALSE)
 
 table(obs_injection$TRAY_INJECTION)
-prop.test(11,14,correct = FALSE)
+prop.test(10,14,correct = FALSE)
 
 table(obs_injection$PREFILLED_DEVICES)
 prop.test(14,14,correct = FALSE)
@@ -162,22 +142,22 @@ table(obs_injection$VIALS_ACCESS)
 binom.test(4,4)
 
 table(obs_injection$DEVICES_USED)
-prop.test(12,14,correct = FALSE)
+prop.test(13,14,correct = FALSE)
 
 table(obs_injection$CONTAINER_SHARP)
 prop.test(14,14,correct = FALSE)
 
 table(obs_injection$RED_BAG)
-prop.test(14,14,correct = FALSE)
+prop.test(12,14,correct = FALSE)
 
 table(obs_injection$DISINFECTED_CORRECT)
-binom.test(1,5)
+binom.test(1,3)
 
 Injection_obs <- c('wears gloves', 'use tray injection', 'use prefilled device', 'wipe access diaphragm with alcohol','did not leave syringe in diaphragm',
-            'syringe intact before disposal', 'use sharp disposal container', 'use red bag for hazardous waste',
-            'disinfect spills')
-Injection_correct <- c(14, 11, 14, 1, 4, 12, 14, 14, 1)
-Injection_incorrect <- c(0, 3, 0, 0, 0, 2, 0, 0, 4)
+                   'syringe intact before disposal', 'use sharp disposal container', 'use red bag for hazardous waste',
+                   'disinfect spills')
+Injection_correct <- c(14, 10, 14, 1, 4, 13, 14, 12, 1)
+Injection_incorrect <- c(0, 4, 0, 0, 0, 1, 0, 2, 2)
 library(reshape2)
 Injection_obs_df <- melt(data.frame(Injection_obs, Injection_correct, Injection_incorrect), id.vars="Injection_obs")  #make data frame wide
 
@@ -222,28 +202,28 @@ plot_inject <- ggplot(Injection_obs_cumsum,aes(x = Injection_obs, y = value,fill
 
 obs_wound <- HCW_Observation [which(HCW_Observation$WOUND_DRESSING==1),]
 apply(obs_wound[c("GLOVES", "TRAY_INJECTION", "PREFILLED_DEVICES", "DIAPHRAGMS_ALCOHOL", "VIALS_ACCESS", 
-                      "DEVICES_USED", "CONTAINER_SHARP", "RED_BAG", "DISINFECTED_CORRECT")], 2, table)
+                  "DEVICES_USED", "CONTAINER_SHARP", "RED_BAG", "DISINFECTED_CORRECT")], 2, table)
 
 table(obs_wound$GLOVES)
-prop.test(11,11,correct = FALSE)
+prop.test(12,12,correct = FALSE)
 
 table(obs_wound$PREFILLED_DEVICES)
-binom.test(0,1)
+binom.test(0,0)
 
 table(obs_wound$DIAPHRAGMS_ALCOHOL)
-binom.test(0,1)
+binom.test(0,0)
 
 table(obs_wound$RED_BAG)
-prop.test(9,10,correct = FALSE)
+prop.test(11,12,correct = FALSE)
 
 table(obs_wound$DISINFECTED_CORRECT)
-binom.test(1,3)
+binom.test(1,4)
 
 wound_obs <- c('wears gloves', 'use tray injection', 'use prefilled device', 'wipe access diaphragm with alcohol','did not leave syringe in diaphragm',
-                   'syringe intact before disposal', 'use sharp disposal container', 'use red bag for hazardous waste',
-                   'disinfect spills')
-wound_correct <- c(11, 0, 0, 0, 0, 0, 0, 9, 1)
-wound_incorrect <- c(0, 0, 1, 1, 0, 0, 0, 1, 2)
+               'syringe intact before disposal', 'use sharp disposal container', 'use red bag for hazardous waste',
+               'disinfect spills')
+wound_correct <- c(12, 0, 0, 0, 0, 0, 0, 11, 1)
+wound_incorrect <- c(0, 0, 0, 0, 0, 0, 0, 1, 3)
 library(reshape2)
 wound_obs_df <- melt(data.frame(wound_obs, wound_correct, wound_incorrect), id.vars="wound_obs")  #make data frame wide
 
@@ -288,7 +268,7 @@ plot_wound <- ggplot(wound_obs_cumsum[which(wound_obs_cumsum$value>0 & wound_obs
 
 obs_bloodsamp <- HCW_Observation [which(HCW_Observation$BLOOD_SAMPLE==1),]
 apply(obs_bloodsamp[c("GLOVES", "TRAY_INJECTION", "PREFILLED_DEVICES", "DIAPHRAGMS_ALCOHOL", "VIALS_ACCESS", 
-                  "DEVICES_USED", "CONTAINER_SHARP", "RED_BAG", "DISINFECTED_CORRECT")], 2, table)
+                      "DEVICES_USED", "CONTAINER_SHARP", "RED_BAG", "DISINFECTED_CORRECT")], 2, table)
 
 table(obs_bloodsamp$GLOVES)
 prop.test(11,11,correct = FALSE)
@@ -300,13 +280,13 @@ table(obs_bloodsamp$PREFILLED_DEVICES)
 prop.test(11,11,correct = FALSE)
 
 table(obs_bloodsamp$DIAPHRAGMS_ALCOHOL)
-binom.test(0,1)
+binom.test(0,0)
 
 table(obs_bloodsamp$VIALS_ACCESS)
-binom.test(2,2)
+binom.test(1,1)
 
 table(obs_bloodsamp$DEVICES_USED)
-prop.test(7,10,correct = FALSE)
+prop.test(9,11,correct = FALSE)
 
 table(obs_bloodsamp$CONTAINER_SHARP)
 prop.test(10,11,correct = FALSE)
@@ -318,10 +298,10 @@ table(obs_bloodsamp$DISINFECTED_CORRECT)
 binom.test(1,1)
 
 bloodsamp_obs <- c('wears gloves', 'use tray injection', 'use prefilled device', 'wipe access diaphragm with alcohol','did not leave syringe in diaphragm',
-               'syringe intact before disposal', 'use sharp disposal container', 'use red bag for hazardous waste',
-               'disinfect spills')
-bloodsamp_correct <- c(11, 4, 11, 0, 2, 7, 10, 11, 1)
-bloodsamp_incorrect <- c(0, 7, 0, 1, 0, 3, 1, 0, 0)
+                   'syringe intact before disposal', 'use sharp disposal container', 'use red bag for hazardous waste',
+                   'disinfect spills')
+bloodsamp_correct <- c(11, 4, 11, 0, 1, 9, 10, 11, 1)
+bloodsamp_incorrect <- c(0, 7, 0, 0, 0, 2, 1, 0, 0)
 library(reshape2)
 bloodsamp_obs_df <- melt(data.frame(bloodsamp_obs, bloodsamp_correct, bloodsamp_incorrect), id.vars="bloodsamp_obs")  #make data frame wide
 
@@ -367,25 +347,27 @@ plot_blood <- ggplot(bloodsamp_obs_cumsum[which(bloodsamp_obs_cumsum$value>0 & b
 
 obs_iv <- HCW_Observation [which(HCW_Observation$INTRAVENOUS==1),]
 apply(obs_iv[c("GLOVES", "TRAY_INJECTION", "PREFILLED_DEVICES", "DIAPHRAGMS_ALCOHOL", "VIALS_ACCESS", 
-                      "DEVICES_USED", "CONTAINER_SHARP", "RED_BAG", "DISINFECTED_CORRECT")], 2, table)
+               "DEVICES_USED", "CONTAINER_SHARP", "RED_BAG", "DISINFECTED_CORRECT")], 2, table)
 
 table(obs_iv$GLOVES)
 prop.test(6,6,correct = FALSE)
 
 table(obs_iv$TRAY_INJECTION)
-binom.test(2,3)
+binom.test(2,5)
 
 table(obs_iv$PREFILLED_DEVICES)
-binom.test(3,3)
+binom.test(4,5)
 
 table(obs_iv$DIAPHRAGMS_ALCOHOL)
+binom.test(0,0)
 table(obs_iv$VIALS_ACCESS)
+binom.test(0,0)
 
 table(obs_iv$DEVICES_USED)
-binom.test(0,1)
+binom.test(2,3)
 
 table(obs_iv$CONTAINER_SHARP)
-binom.test(3,4)
+binom.test(2,5)
 
 table(obs_iv$RED_BAG)
 binom.test(5,6)
@@ -395,10 +377,10 @@ binom.test(0,1)
 
 
 iv_obs <- c('wears gloves', 'use tray injection', 'use prefilled device', 'wipe access diaphragm with alcohol','did not leave syringe in diaphragm',
-                   'syringe intact before disposal', 'use sharp disposal container', 'use red bag for hazardous waste',
-                   'disinfect spills')
-iv_correct <- c(6, 2, 3, 0, 0, 0, 3, 5, 0)
-iv_incorrect <- c(0, 1, 0, 0, 0, 1, 1, 1, 1)
+            'syringe intact before disposal', 'use sharp disposal container', 'use red bag for hazardous waste',
+            'disinfect spills')
+iv_correct <- c(6, 2, 4, 0, 0, 2, 2, 5, 0)
+iv_incorrect <- c(0, 3, 1, 0, 0, 1, 3, 1, 1)
 library(reshape2)
 iv_obs_df <- melt(data.frame(iv_obs, iv_correct, iv_incorrect), id.vars="iv_obs")  #make data frame wide
 
@@ -439,87 +421,7 @@ plot_IV <- ggplot(iv_obs_cumsum[which(iv_obs_cumsum$value>0 & iv_obs_cumsum$labe
   theme(plot.subtitle = element_text(vjust = 1), plot.caption = element_text(vjust = 1))
 
 
-#################################
-## IC observation in Sutures   ##
-#################################
-
-obs_suture <- HCW_Observation [which(HCW_Observation$SUTURES==1),]
-apply(obs_suture[c("GLOVES", "TRAY_INJECTION", "PREFILLED_DEVICES", "DIAPHRAGMS_ALCOHOL", "VIALS_ACCESS", 
-               "DEVICES_USED", "CONTAINER_SHARP", "RED_BAG", "DISINFECTED_CORRECT")], 2, table)
-
-table(obs_suture$GLOVES)
-binom.test(0,2)
-
-
-suture_obs <- c('wears gloves', 'use tray injection', 'use prefilled device', 'wipe access diaphragm with alcohol','did not leave syringe in diaphragm',
-            'syringe intact before disposal', 'use sharp disposal container', 'use red bag for hazardous waste',
-            'disinfect spills')
-suture_correct <- c(2, 1, 0, 0, 0, 1, 2, 2, 0)
-suture_incorrect <- c(0, 0, 1, 0, 0, 0, 0, 0, 2)
-library(reshape2)
-suture_obs_df <- melt(data.frame(suture_obs, suture_correct, suture_incorrect), id.vars="suture_obs")  #make data frame wide
-
-#sort df
-library(plyr)
-suture_obs_df_sorted <- arrange(suture_obs_df, suture_obs, variable)
-head(suture_obs_df_sorted)
-#Calculate the cumulative sum
-suture_obs_cumsum <- ddply(suture_obs_df_sorted, "suture_obs", transform, label_ypos=cumsum(value))
-head(suture_obs_cumsum)
-
-# stacked bar plot
-ggplot(suture_obs_cumsum[which(suture_obs_cumsum$value>0 & suture_obs_cumsum$label_ypos>0),], aes(x=suture_obs, value, fill=variable)) + 
-  geom_bar(stat="identity") +coord_flip()+
-  scale_fill_manual(values=wes_palette(n=2, name="Moonrise2"), 
-                    name="variable",
-                    breaks=c("suture_correct", "suture_incorrect"),
-                    labels=c("Procedures done correctly", "Procedure not done/done \n incorrectly")) +
-  geom_text(aes(label = value, y = value), position = position_stack(vjust = 0.5), size = 4)+
-  theme(axis.title = element_text(face = "bold"),plot.title = element_text(size = 14,face = "bold", hjust = 0.5)) +
-  labs(title = "Infection control procedures observed in suture procedure",x = "Procedures", y = "Frequency")
-
-
-###########################################
-## IC observation in Blood transfusion   ##
-###########################################
-
-obs_bloodtrans <- HCW_Observation [which(HCW_Observation$BLOOD_TRANSFUSION==1),]
-apply(obs_bloodtrans[c("GLOVES", "TRAY_INJECTION", "PREFILLED_DEVICES", "DIAPHRAGMS_ALCOHOL", "VIALS_ACCESS", 
-                   "DEVICES_USED", "CONTAINER_SHARP", "RED_BAG", "DISINFECTED_CORRECT")], 2, table)
-
-table(obs_bloodtrans$GLOVES)
-binom.test(2,2)
-
-
-
-bloodtrans_obs <- c('wears gloves', 'use tray injection', 'use prefilled device', 'wipe access diaphragm with alcohol','did not leave syringe in diaphragm',
-                'syringe intact before disposal', 'use sharp disposal container', 'use red bag for hazardous waste',
-                'disinfect spills')
-bloodtrans_correct <- c(1, 0, 0, 0, 0, 0, 0, 0, 0)
-bloodtrans_incorrect <- c(0, 0, 0, 0, 0, 0, 0, 1, 1)
-library(reshape2)
-bloodtrans_obs_df <- melt(data.frame(bloodtrans_obs, bloodtrans_correct, bloodtrans_incorrect), id.vars="bloodtrans_obs")  #make data frame wide
-
-#sort df
-library(plyr)
-bloodtrans_obs_df_sorted <- arrange(bloodtrans_obs_df, bloodtrans_obs, variable)
-head(bloodtrans_obs_df_sorted)
-#Calculate the cumulative sum
-bloodtrans_obs_cumsum <- ddply(bloodtrans_obs_df_sorted, "bloodtrans_obs", transform, label_ypos=cumsum(value))
-head(bloodtrans_obs_cumsum)
-
-# stacked bar plot
-ggplot(bloodtrans_obs_cumsum[which(bloodtrans_obs_cumsum$value>0 & bloodtrans_obs_cumsum$label_ypos>0),], aes(x=bloodtrans_obs, value, fill=variable)) + 
-  geom_bar(stat="identity") +coord_flip()+
-  scale_fill_manual(values=wes_palette(n=2, name="Moonrise2"), 
-                    name="variable",
-                    breaks=c("bloodtrans_correct", "bloodtrans_incorrect"),
-                    labels=c("Procedures done correctly", "Procedure not done/done \n incorrectly")) +
-  geom_text(aes(label = value, y = value), position = position_stack(vjust = 0.5), size = 4)+
-  theme(axis.title = element_text(face = "bold"),plot.title = element_text(size = 14,face = "bold", hjust = 0.5)) +
-  labs(title = "Infection control procedures observed in blood transfusion procedure", x = "Procedures", y = "Frequency")
- 
- ### compare compliance between surgery and int med ###
+#### compare compliance between surgery and int med ####
 
 #surgery = 1
 HCW_Observation_surg <- HCW_Observation[which(HCW_Observation$HOSPITAL==1),]
@@ -529,21 +431,23 @@ prop.test(3,18,correct=FALSE)  #16.67% 95CI: 5.84-39.22%
 
 #disinfect blood spilled correctly
 table(HCW_Observation_surg$DISINFECTED_CORRECT)
-binom.test(1,7) #14.29% 95CI: 0.36-57.87%
+binom.test(1,6) #16.67% 95CI: 0.42-64.12%
 
 #int med = 2
 HCW_Observation_intmed <- HCW_Observation[which(HCW_Observation$HOSPITAL==2),]
 ##using tray injection
 table(HCW_Observation_intmed$TRAY_INJECTION)
-prop.test(3,14, correct=F)  #21.43% 95CI: 7.57-47.59%
+prop.test(3,16, correct=F)  #18.75% 95CI: 6.59-43.01%
 
 #disinfect blood spilled correctly
 table(HCW_Observation_intmed$DISINFECTED_CORRECT)
-prop.test(3,11, correct=F) #27.27% 95CI: 9.75-56.56%
+binom.test(3,9) #33.33% 95CI: 7.49-70.07%
+
 
 library(readxl)
-IC_compliance <- read_excel("~/IC compliance.xlsx", 
+IC_compliance <- read_excel("~/Updated IC compliance.xlsx", 
                             col_types = c("text", "text", "numeric", "numeric", "numeric", "numeric","numeric", "numeric"))
+
 # plot
 library(ggplot2)
 library(wesanderson)
@@ -560,7 +464,7 @@ ggplot(IC_compliance, aes(x=IC, y=compliance, fill=hospital))+
         plot.title = element_text(size = 14, 
                                   face = "bold", hjust = 0.5)) +
   labs(title = "Comparison of compliance rate", x = "Infection control methods", y = "Compliance rate (%)",fill = "Hospitals") + theme(axis.title = element_text(size = 13), 
-    axis.text = element_text(size = 12), 
-    plot.title = element_text(size = 15), 
-    legend.text = element_text(size = 12), 
-    legend.title = element_text(size = 12))
+                                                                                                                                       axis.text = element_text(size = 12), 
+                                                                                                                                       plot.title = element_text(size = 15), 
+                                                                                                                                       legend.text = element_text(size = 12), 
+                                                                                                                                       legend.title = element_text(size = 12))
