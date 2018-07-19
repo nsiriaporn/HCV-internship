@@ -1,170 +1,160 @@
-### Risk Analysis ###
-
-#df patient_risk created in trajectory analysis
+### Risk Analysis: Patient profile ###
+Patient.Questionnaire <- read.csv("C:/Users/Jung/Desktop/Extraction 2018_07_06/Patient.csv", sep=";")
+#patient_risk from Trajectory analysis script
 
 # overall mean
-mean(patient_risk$risk)
-sd(patient_risk$risk)
-t.test(patient_risk$risk, sigma.x = 0.0503246)
+t.test(patient_risk$risk)
 mean(patient_risk$`sensitivity low`)
 mean(patient_risk$`sensitivity high`)
 
 #### Hospitals ####
-#Merge patient_risk with admission and hopsital data from Patient.Questinnaire (data from IMMHoTHep)
+#Merge patient_risk with admission and hopsital data from Patient.Questinnaire
 admis_hosp_risk <- merge(x = patient_risk, y = Patient.Questionnaire[ , c("ID_PATIENT","DEPARTMENT", 
                                                                           "PLACE_RECRUITMENT")], by = "ID_PATIENT")
 
 #mean risk for surgery hospital
-mean(admis_hosp_risk$risk[which(admis_hosp_risk$DEPARTMENT==1)]) 
-sd(admis_hosp_risk$risk[which(admis_hosp_risk$DEPARTMENT==1)]) 
+t.test(admis_hosp_risk$risk[which(admis_hosp_risk$DEPARTMENT==1)]) 
 mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$DEPARTMENT==1)])
 mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$DEPARTMENT==1)])
-## 0.01347303 sd=0.01533099 (0.006171904 to 0.05393858)
+## 0.01138253 (0.005244944 to 0.04452193) (95CI: 0.008928293 to 0.013836770)
 
 #mean risk for internal medicine hospital
-mean(admis_hosp_risk$risk[which(admis_hosp_risk$DEPARTMENT==2)]) 
-sd(admis_hosp_risk$risk[which(admis_hosp_risk$DEPARTMENT==2)]) 
+t.test(admis_hosp_risk$risk[which(admis_hosp_risk$DEPARTMENT==2)]) 
 mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$DEPARTMENT==2)])
 mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$DEPARTMENT==2)])
-## 0.04650724 sd=0.06884795 (0.02218864 to 0.1593366)
+## 0.03838592 (0.01827999 to 0.1331358) (95CI: 0.03012664 to 0.04664520)
 
 #Statistical test between surgery and internal medicine
 t.test(admis_hosp_risk$risk[which(admis_hosp_risk$DEPARTMENT==1)],admis_hosp_risk$risk[which(admis_hosp_risk$DEPARTMENT==2)])
+#p-value = 2.472e-09
 
-#95CI using ttest in STATA
-hosp_mean_plot <- data.frame(
-  hosp = factor(c("surgery", "internal medicine")),
-  mean = c(1.347303, 4.650724),
-  lower = c(1.16530, 3.74827),
-  upper = c(1.52930, 5.55318)
-)
+library(readxl)
+hosp_mean_plot <- read_excel("~/Updated mean for plot.xlsx", sheet = "hospital", 
+                             col_types = c("text", "numeric", "numeric", "numeric","numeric", "numeric"))
 
 library(ggplot2)
-ggplot(hosp_mean_plot, aes(hosp, mean))+
-  geom_col(position = "dodge") +geom_errorbar(aes(ymin=lower, ymax=upper), width=0.2) +
-  geom_text(aes(y=mean, label=round(mean,2), vjust=-0.5, hjust=3))+
+ggplot(hosp_mean_plot, aes(Hospital, Mean*100))+
+  geom_col(position = "dodge") +geom_errorbar(aes(ymin=CIL*100, ymax=CIU*100), width=0.2) +
+  geom_text(aes(y=Mean*100, label=round(Mean*100,2), vjust=-0.5, hjust=3))+
   theme(plot.subtitle = element_text(vjust = 1), 
-    plot.caption = element_text(vjust = 1), 
-    axis.title = element_text(face = "bold"), 
-    plot.title = element_text(size = 15, 
-        face = "bold", hjust = 0.5)) +labs(title = "Average patient risk in hospsitals", 
-    x = "Hospital", y = "Average risk (%)", 
-    caption = "Two-sample t-test: P-value < 0.0001")
+        plot.caption = element_text(vjust = 1), 
+        axis.title = element_text(face = "bold"), 
+        plot.title = element_text(size = 15, face = "bold", hjust = 0.5)) +
+  labs(title = "Average patient risk in hospitals", x = "Hospital", 
+       y = "Average risk (%)", caption = "Two-sample t-test: P-value < 0.0001")
+
 
 #### Admissions by Hospitals ####
 #Overall admission types
 #mean risk for outpatient clinic admission
-mean(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1)])
-sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1)])
-t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1)], sigma.x=6.150445)
+t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1)])
 mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==1)])
 mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==1)])
+#0.02380523 (0.01151149 to 0.07917787) (95CI: 0.01582932 to 0.03178114)
 
 #mean risk for ER admission
-mean(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2)])
-sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2)])
-t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2)], sigma.x=3.844933)
+t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2)])
 mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==2)])
 mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==2)])
+#0.0233652 (0.01080742 to 0.08886556) (95CI: 0.01965395 to 0.02707646)
 
-#Statistical test
 t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1)], admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2)])
-#p-value = 0.573
+#p-value = 0.9216
 
 #plot
 library(ggplot2)
 library(readxl)
-ad_mean_plot <- read_excel("~/mean for plot.xlsx", sheet = "admission overall", 
+ad_mean_plot <- read_excel("~/Updated mean for plot.xlsx", sheet = "admission overall", 
                            col_types = c("text","numeric", "numeric", "numeric","numeric", "numeric"))
 
-ggplot(ad_mean_plot, aes(x=Admission, y=round(Mean,2)))+
+ggplot(ad_mean_plot, aes(x=Admission, y=round(Mean*100,2)))+
   geom_bar(stat = "identity")+
-  geom_errorbar(aes(ymin=CIL, ymax=CIU),width=0.2)+
-  geom_text(aes(label=round(Mean,2), vjust=-1, hjust=2)) + 
+  geom_errorbar(aes(ymin=CIL*100, ymax=CIU*100),width=0.2)+
+  geom_text(aes(label=round(Mean*100,2), vjust=-1, hjust=2)) + 
   theme(plot.subtitle = element_text(vjust = 1), plot.caption = element_text(vjust = 1),  
         axis.title = element_text(face = "bold"), 
         plot.title = element_text(size = 15, face = "bold", hjust = 0.5)) +
   labs(title = "Average risk by admission", x = "Admission",  y = "Risk (%)")+
-  labs(caption = "Two sample t-test: P-value = 0.573")
+  labs(caption = "Two sample t-test: P-value = 0.9216")
 
 #admissions in surgery
 #mean risk for outpatient clinic admission in surgery hospital
-mean(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)])
-sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)])
-t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)], sigma.x = 0.01636614)
+t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)])
 mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)])
 mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)])
-## 0.0125163 sd=0.01636614 (0.005737933 to 0.04991165)
-## 95CI: 0.009763482 to 0.015264650
+## 0.01113047 (0.005163921 to 0.04225606)
+## 95CI: 0.006693397 to 0.015567546
 
 #mean risk for ER admission in surgery hospital
-mean(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)])
-sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)])
-t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)], sigma.x = 0.01424288)
+t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)])
 mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)])
 mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)])
-## 0.01440911 sd=0.01424288 (0.006596508 to 0.0578786)
-## 95CI: 0.01204226 to 0.01677779
+## 0.01162208 (0.005321945 to 0.0466753)
+## 95CI: 0.009292613 to 0.013951542
 
-#Statistical testing between admission types in surgery
 t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==1)], admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==1)])
+#p-value = 0.8464
 
 #plot
-library(ggplot2)
+librarry(ggplot2)
 library(readxl)
-ad_surg_mean_plot <- read_excel("~/mean for plot.xlsx", sheet = "admission surgery", 
+ad_surg_mean_plot <- read_excel("~/Updated mean for plot.xlsx", sheet = "admission surgery", 
                                 col_types = c("text", "numeric", "numeric", "numeric", "numeric", "numeric"))
-ggplot(ad_surg_mean_plot, aes(x=Admission, y=round(Mean,2)))+
+ggplot(ad_surg_mean_plot, aes(x=Admission, y=round(Mean*100,2)))+
   geom_bar(stat = "identity")+
-  geom_errorbar(aes(ymin=CIL, ymax=CIU),width=0.2)+
-  geom_text(aes(label=round(Mean,2), vjust=-1, hjust=2)) + 
+  geom_errorbar(aes(ymin=CIL*100, ymax=CIU*100),width=0.2)+
+  geom_text(aes(label=round(Mean*100,2), vjust=-1, hjust=2)) + 
   theme(plot.subtitle = element_text(vjust = 1), plot.caption = element_text(vjust = 1),  
         axis.title = element_text(face = "bold"), 
         plot.title = element_text(size = 15, face = "bold", hjust = 0.5)) +
   labs(title = "Average risk by admission in surgery hospital", x = "Admission",  y = "Risk (%)")+
-  labs(caption = "Two sample t-test: P-value = 0.3076")
+  labs(caption = "Two sample t-test: P-value = 0.8464")
+
+
 
 #admission in int med
 #mean risk for outpatient clinic admission in internal medicine hospital
-mean(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)])
-sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)])
-t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)], sigma.x = 0.09044733)
+t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)])
 mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)])
 mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)])
-## 0.04782465 sd=0.09044733 (0.02347702 to 0.150755)
-## 95CI: 0.02953990 to 0.06610863
+## 0.0422663 (0.02075687 to 0.1329553)
+## 95CI: 0.02422683 to 0.06030577
+
 
 #mean risk for ER admission in internal medicine hospital
-mean(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)])
-sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)])
-t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)], sigma.x = 0.04828532)
+t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)])
 mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)])
 mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)])
-## 0.04556908 sd=0.04828532 (0.02127116 to 0.1654477)
-## 95CI: 0.03733320 to 0.05380747
+## 0.03572178 (0.01657944 to 0.1332598)
+## 95CI: 0.02908787 to 0.04235568
 
-#Statistical test between admissions in int med
 t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1 & admis_hosp_risk$DEPARTMENT==2)], admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2 & admis_hosp_risk$DEPARTMENT==2)])
+#p-value = 0.5004
 
 #plot
 library(readxl)
-ad_intmed_mean_plot <- read_excel("~/mean for plot.xlsx", sheet = "admission int med", 
+ad_intmed_mean_plot <- read_excel("~/Updated mean for plot.xlsx", sheet = "admission int med", 
                                   col_types = c("text", "numeric", "numeric", "numeric", "numeric", "numeric"))
 
-ggplot(ad_intmed_mean_plot, aes(x=Admission, y=round(Mean,2)))+
+ggplot(ad_intmed_mean_plot, aes(x=Admission, y=round(Mean*100,2)))+
   geom_bar(stat = "identity")+
-  geom_errorbar(aes(ymin=CIL, ymax=CIU),width=0.2)+
-  geom_text(aes(label=round(Mean,2), vjust=-1, hjust=2)) + 
+  geom_errorbar(aes(ymin=CIL*100, ymax=CIU*100),width=0.2)+
+  geom_text(aes(label=round(Mean*100,2), vjust=-1, hjust=2)) + 
   theme(plot.subtitle = element_text(vjust = 1), plot.caption = element_text(vjust = 1),  
         axis.title = element_text(face = "bold"), 
         plot.title = element_text(size = 15, face = "bold", hjust = 0.5)) +
   labs(title = "Average risk by admission in internal med hospital", x = "Admission",  y = "Risk (%)")+
-  labs(caption = "Two sample t-test: P-value = 0.8259")
+  labs(caption = "Two sample t-test: P-value = 0.5004")
+
+
+admis_hosp_risk$hosp_recruit <- paste(admis_hosp_risk$DEPARTMENT, admis_hosp_risk$PLACE_RECRUITMENT)
+kruskal.test(risk ~ hosp_recruit, data=admis_hosp_risk)
 
 #plot comparing admissions in both hospitals
 library(readxl)
-admission_mean_plot <- read_excel("~/mean for plot.xlsx", sheet = "admission", 
+admission_mean_plot <- read_excel("~/Updated mean for plot.xlsx", sheet = "admission", 
                                   col_types = c("text", "text", "numeric", "numeric", "numeric","numeric", "numeric"))
+
 # plot
 library(ggplot2)
 library(wesanderson)
@@ -181,157 +171,130 @@ ggplot(admission_mean_plot, aes(x=Admission, y=Mean*100, fill=Hospital))+
         plot.title = element_text(size = 14, 
                                   face = "bold", hjust = 0.5)) +
   labs(title = "Average risk by admission", x = "Admission", y = "Average risk (%)",fill = "Hospitals")
-  
+
 #outpatient clinic in both hospital
-sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1)])
-t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1)], sigma.x=6.150445)
+t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1)])
 mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==1)])
 mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==1)])
+#0.02380523 (0.01151149 to 0.07917787)
+#95CI: 0.01582932 to 0.03178114
 
 #ER in both hospital
-sd(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2)])
-t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2)], sigma.x=3.844933)
+t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2)])
 mean(admis_hosp_risk$`sensitivity low`[which(admis_hosp_risk$PLACE_RECRUITMENT==2)])
 mean(admis_hosp_risk$`sensitivity high`[which(admis_hosp_risk$PLACE_RECRUITMENT==2)])
+#0.0233652 (0.01080742 to 0.08886556)
+#95CI: 0.01965395 to 0.02707646
 
-#statistical test in both admissions
+#t-test in both admissions
 t.test(admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==1)], admis_hosp_risk$risk[which(admis_hosp_risk$PLACE_RECRUITMENT==2)])
+#p-value = 0.9216 // not significant
 
-##admission in surgery hospital
-admis_surgery_risk <- admis_hosp_risk[which(admis_hosp_risk$DEPARTMENT==1),]
-
-#outpatient clinic
-sd(admis_surgery_risk$risk[which(admis_surgery_risk$PLACE_RECRUITMENT==1)])
-t.test(admis_surgery_risk$risk[which(admis_surgery_risk$PLACE_RECRUITMENT==1)], sigma.x=1.636612)
-
-#ER
-sd(admis_surgery_risk$risk[which(admis_surgery_risk$PLACE_RECRUITMENT==2)])
-t.test(admis_surgery_risk$risk[which(admis_surgery_risk$PLACE_RECRUITMENT==2)], sigma.x=1.424292)
-
-#t-test between two admission
-t.test(admis_surgery_risk$risk[which(admis_surgery_risk$PLACE_RECRUITMENT==1)], admis_surgery_risk$risk[which(admis_surgery_risk$PLACE_RECRUITMENT==2)])
-
-
-##admission in internal med
-admis_im_risk <- admis_hosp_risk[which(admis_hosp_risk$DEPARTMENT==2),]
-
-#outpatient clinic
-sd(admis_im_risk$risk[which(admis_im_risk$PLACE_RECRUITMENT==1)])
-t.test(admis_im_risk$risk[which(admis_im_risk$PLACE_RECRUITMENT==1)], sigma.x=9.044734)
-
-#ER
-sd(admis_im_risk$risk[which(admis_im_risk$PLACE_RECRUITMENT==2)])
-t.test(admis_im_risk$risk[which(admis_im_risk$PLACE_RECRUITMENT==2)], sigma.x=4.82853)
-
-#t-test between two admission
-t.test(admis_im_risk$risk[which(admis_im_risk$PLACE_RECRUITMENT==1)], admis_im_risk$risk[which(admis_im_risk$PLACE_RECRUITMENT==2)])
 
 #### Gender ####
 #Merge patient_risk with gender data from Patient.Questinnaire
 gender_risk <- merge(patient_risk, Patient.Questionnaire[ , c("ID_PATIENT","GENDER", "DEPARTMENT")], by = "ID_PATIENT")
 
-##Overall
 #mean risk for males
-mean(gender_risk$risk[which(gender_risk$GENDER==1)]) #0.03083677
-sd(gender_risk$risk[which(gender_risk$GENDER==1)])
-t.test(gender_risk$risk[which(gender_risk$GENDER==1)], sigma.x=0.05776771)
-mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==1)]) #0.01469476
-mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==1)]) #0.107749
+t.test(gender_risk$risk[which(gender_risk$GENDER==1)])
+mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==1)]) 
+mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==1)]) 
+#0.02538191 (0.01209452 to 0.08899657)
+#95CI: 0.01917432 to 0.03158950
 
 #mean risk for females
-mean(gender_risk$risk[which(gender_risk$GENDER==2)]) #0.02504567
-sd(gender_risk$risk[which(gender_risk$GENDER==2)])
-t.test(gender_risk$risk[which(gender_risk$GENDER==2)], sigma.x=0.03789423)
-mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==2)]) #0.01164233
-mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==2)]) #0.09301156
-t.test(risk ~ GENDER, data=gender_risk) # p-value=0.1768 (not significant)
-t.test(gender_risk$risk[which(gender_risk$GENDER==1)], gender_risk$risk[which(gender_risk$GENDER==2)])
+t.test(gender_risk$risk[which(gender_risk$GENDER==2)])
+mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==2)]) 
+mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==2)]) 
+#0.02110528 (0.009814154 to 0.07840945)
+#0.01622780 to 0.02598275
+
+t.test(risk ~ GENDER, data=gender_risk) 
+# p-value=0.2866 // not significant
+t.test(gender_risk$risk[which(gender_risk$GENDER==1)], gender_risk$risk[which(gender_risk$GENDER==2)]) #another way to do it
 
 #plot
 library(readxl)
-sex_mean_plot <- read_excel("~/mean for plot.xlsx", sheet = "gender overall", 
+sex_mean_plot <- read_excel("~/Updated mean for plot.xlsx", sheet = "gender overall", 
                             col_types = c("text", "numeric", "numeric", "numeric", "numeric", "numeric"))
 library(ggplot2)
 ggplot(sex_mean_plot, aes(x=Gender, y=round(Mean*100,2)))+
   geom_bar(stat = "identity")+
   geom_errorbar(aes(ymin=CIL*100, ymax=CIU*100),width=0.2)+
-  geom_text(aes(label=round(Mean*100,2), vjust=-1, hjust=2)) + theme(plot.subtitle = element_text(vjust = 1), 
-    plot.caption = element_text(vjust = 1), 
-    axis.title = element_text(face = "bold"), 
-    plot.title = element_text(size = 15, 
-        face = "bold", hjust = 0.5)) +labs(title = "Average risk by sex", x = "Sex", 
-    y = "Risk (%)")+
-  labs(caption = "Two sample t-test: P-value = 0.1768")
+  geom_text(aes(label=round(Mean*100,2), vjust=-1, hjust=2)) + 
+  theme(plot.subtitle = element_text(vjust = 1), plot.caption = element_text(vjust = 1),
+        axis.title = element_text(face = "bold"), plot.title = element_text(size = 15, face = "bold", hjust = 0.5)) +
+  labs(title = "Average risk by sex", x = "Sex", y = "Risk (%)")+
+  labs(caption = "Two sample t-test: P-value = 0.2866")
 
-##Genders in surgery
+
+
 #mean risk for males in surgery hospital
-mean(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==1)])
-sd(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==1)])
+t.test(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==1)])
 mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==1)])
 mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==1)])
-## 0.01321508 SD=0.01152152 (0.006040533 to 0.05350532)
-t.test(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==1)], sigma.x = 0.01152152)
-## 95CI 0.01139286 to 0.01503729
+## 0.0102868 (0.00470121 to 0.04170834)
+## 95CI 0.008513558 to 0.012060046
 
 #mean risk for females in surgery hospital
-mean(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==1)])
-sd(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==1)])
+t.test(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==1)])
 mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==1)])
 mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==1)])
-## 0.01381118 SD=0.01926646 (0.006344121 to 0.05450655)
-t.test(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==1)], sigma.x = 0.01926646)
-## 95CI 0.01031372 to 0.01730865
+## 0.01281895 (0.005957738 to 0.04821033)
+## 95CI 0.007609209 to 0.018028690
 
-#Statistical test
+#t-test for genders in surgery
 t.test(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==1)], gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==1)])
-# p-value = 0.7652 not significant
+#p-value = 0.3638
 
-##Genders in int med
 #mean risk for males in internal medicine hospital
-mean(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==2)])
-sd(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==2)])
+t.test(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==2)])
 mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==2)])
 mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==2)])
-## 0.05166241 SD=0.07966932 (0.02492248 to 0.1718552)
-t.test(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==2)], sigma.x = 0.07966932)
-## 95CI 0.03794466 to 0.06538016
+## 0.04322158 (0.02083207 to 0.1448827)
+## 95CI 0.03041129 to 0.05603188
 
 #mean risk for females in internal medicine hospital
-mean(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
-sd(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
+t.test(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
 mean(gender_risk$`sensitivity low`[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
 mean(gender_risk$`sensitivity high`[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
-## 0.03926806 (0.01834964 to 0.1417573)
-t.test(gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)], sigma.x = 0.04936061)
+## 0.03159541 (0.01834964 to 0.1417573)
 ## 95CI 0.02915803 to 0.04937809
 
-#Statistical test
+#t-test for genders in int med
 t.test(gender_risk$risk[which(gender_risk$GENDER==1 & gender_risk$DEPARTMENT==2)], gender_risk$risk[which(gender_risk$GENDER==2 & gender_risk$DEPARTMENT==2)])
-# p-value = 0.1511 not significant
+#p-value = 0.1359
+
+gender_risk$gender_hosp <- paste(gender_risk$GENDER, gender_risk$DEPARTMENT)
+gender_risk$gender_hosp <- as.factor(gender_risk$gender_hosp)
+kruskal.test(risk ~ gender_hosp, data=gender_risk) 
+#P-value < 0.0001
 
 #plot comparing genders in both hospitals
 library(readxl)
-gender_mean_plot <- read_excel("~/mean for plot.xlsx", sheet = "gender", 
-                                  col_types = c("text", "text", "numeric", "numeric", "numeric","numeric", "numeric"))
+gender_mean_plot <- read_excel("~/Updated mean for plot.xlsx", sheet = "gender", 
+                               col_types = c("text", "text", "numeric", "numeric", "numeric","numeric", "numeric"))
+
+# plot
 library(ggplot2)
 library(wesanderson)
 dodge <- position_dodge(width=0.9)
-ggplot(gender_mean_plot, aes(x=Gender, y=Mean, fill=Hospital))+
-  geom_text(position=position_dodge(width = 1), aes(y=Mean, label=Mean, hjust=1.6, vjust=-0.4))+
+ggplot(gender_mean_plot, aes(x=Gender, y=Mean*100, fill=Hospital))+
+  geom_text(position=position_dodge(width = 1), aes(y=Mean*100, label=round(Mean*100,2), hjust=1.6, vjust=-0.4))+
   geom_bar(stat = "identity", position = "dodge")+
   geom_col(position = dodge)+
-  geom_errorbar(aes(ymin=CIL, ymax=CIU), position = dodge, width=0.25) +
+  geom_errorbar(aes(ymin=CIL*100, ymax=CIU*100), position = dodge, width=0.25) +
   scale_fill_manual(values=wes_palette(n=2, name="Moonrise2"))+
   theme(plot.subtitle = element_text(vjust = 1), 
         plot.caption = element_text(vjust = 1), 
         axis.title = element_text(face = "bold"), 
-        plot.title = element_text(size = 14, 
-                                  face = "bold", hjust = 0.5)) +
-  labs(title = "Average risk by gender", x = "Gender", y = "Average risk (%)",fill = "Hospitals")
+        plot.title = element_text(size = 14, face = "bold", hjust = 0.5)) +
+  labs(title = "Average risk by sex", x = "Gender", y = "Average risk (%)",fill = "Hospitals")
 
 #### Age ####
 # look at the distribution of age in each hospital
 hist(Patient.Questionnaire$AGE)
+
 # age distribution in surgery hospital
 hist(Patient.Questionnaire$AGE[which(Patient.Questionnaire$DEPARTMENT==1)]) ## more patients 20-40
 summary(Patient.Questionnaire$AGE[which(Patient.Questionnaire$DEPARTMENT==1)])
@@ -343,14 +306,14 @@ summary(Patient.Questionnaire$AGE[which(Patient.Questionnaire$DEPARTMENT==2)])
 age_risk <- merge(patient_risk, Patient.Questionnaire[ , c("ID_PATIENT","AGE", "DEPARTMENT")], by = "ID_PATIENT")
 
 # bar plot for surgery hosp (risk by age)
-ggplot(age_risk[which(age_risk$DEPARTMENT==1),], aes(x=AGE, y=risk))+geom_bar(stat="identity") + 
+ggplot(age_risk[which(age_risk$DEPARTMENT==1),], aes(x=AGE, y=risk*100))+geom_bar(stat="identity") + 
   theme(plot.subtitle = element_text(vjust = 1), 
-    plot.caption = element_text(vjust = 1), 
-    axis.title = element_text(face = "bold"), 
-    plot.title = element_text(size = 15, face = "bold", hjust = 0.5)) +
+        plot.caption = element_text(vjust = 1), 
+        axis.title = element_text(face = "bold"), 
+        plot.title = element_text(size = 15, face = "bold", hjust = 0.5)) +
   labs(title = "Risk by age in surgery hospital", x = "Age (year)", y = "Risk")
-# bar plot for surgery hosp (risk by age)
-ggplot(age_risk[which(age_risk$DEPARTMENT==2),], aes(x=AGE, y=risk))+geom_bar(stat="identity")+ 
+# bar plot for int med hosp (risk by age)
+ggplot(age_risk[which(age_risk$DEPARTMENT==2),], aes(x=AGE, y=risk*100))+geom_bar(stat="identity")+ 
   theme(plot.subtitle = element_text(vjust = 1), 
         plot.caption = element_text(vjust = 1), 
         axis.title = element_text(face = "bold"), 
@@ -364,61 +327,75 @@ ggplot(age_risk, aes(x=DEPARTMENT,  y=AGE)) +
   scale_x_discrete(labels=c("Surgery", "Internal med")) + 
   theme(axis.title = element_text(face = "bold"), plot.title = element_text(size = 14, face = "bold", hjust = 0.5)) +
   labs(title = "Age distribution in surgery and internal medicine hopsital", x = "Hospital", y = "Age (years)")
-  
+
+#Pearson trend test
+library(trend)
+partial.cor.trend.test(age_risk$risk, age_risk$AGE, method=c("pearson"))
+# p-value = 0.02609
+
+library(ggplot2)
+ggplot(data=age_risk, aes(x=AGE, y=risk, group=1)) +
+  geom_line()+
+  geom_point()+
+  stat_summary(aes(y = age_risk$risk,group=1), fun.y=mean, colour="red", geom="line",group=1)
+
+#Categorize age into intervals of 10 years
+age_risk_cat <- age_risk
+library(data.table)
+setDT(age_risk_cat)[AGE <31, agegroup := "21-30"]
+age_risk_cat[AGE >30 & AGE <41, agegroup := "31-40"]
+age_risk_cat[AGE >40 & AGE <51, agegroup := "41-50"]
+age_risk_cat[AGE >50 & AGE <61, agegroup := "51-60"]
+age_risk_cat[AGE >60 & AGE <71, agegroup := "61-70"]
+age_risk_cat[AGE >70 & AGE <81, agegroup := "71-80"]
+age_risk_cat[AGE >81, agegroup := "80-85"]
+
+ggplot(data=age_risk_cat, aes(x=agegroup, y=round(risk*100),0, group=1))+
+  geom_point()+
+  stat_summary(aes(y=age_risk_cat$risk*100, group=1), fun.y=mean, colour="red", geom="line", group=1)+
+  labs(x = "Age (years)", y = "Risk (%)")+labs(title = "Trend of risk by age") + theme(plot.title = element_text(size = 15,hjust = 0.5))+
+  labs(caption = "Pearson's trend test: P-value = 0.02609")+ theme(plot.title = element_text(face = "bold"))
+
 #Surgery hospital: 21-28, 29-36, 37-50, 51-85
 
 #mean risk for 21-28 yo in surgery hospital
-mean(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<29 & age_risk$DEPARTMENT==1)])
-sd(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<29 & age_risk$DEPARTMENT==1)])
-t.test(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<29 & age_risk$DEPARTMENT==1)], sigma.x = 0.0123)
+t.test(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<29 & age_risk$DEPARTMENT==1)])
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>20 & age_risk$AGE<29 & age_risk$DEPARTMENT==1)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>20 & age_risk$AGE<29 & age_risk$DEPARTMENT==1)])
-## 0.01341298 SD=0.01233967 (0.00613281 to 0.0542148)
-## 95CI: 0.01068334 to  0.01614262
+## 0.01098112 (0.005025571 to 0.04418268)
+## 95CI: 0.007872535 to 0.014089699
 
 #mean risk for 29-36 yo in surgery hospital
-mean(age_risk$risk[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTMENT==1)])
-sd(age_risk$risk[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTMENT==1)])
-t.test(age_risk$risk[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTMENT==1)], sigma.x = 0.010288)
+t.test(age_risk$risk[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTMENT==1)])
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTMENT==1)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>28 & age_risk$AGE<37 & age_risk$DEPARTMENT==1)])
-## 0.01186815 SD=0.01028844 (0.005420593 to 0.04825749)
-## 95CI: 0.009386122 to 0.014350183
+## 0.008940346 (0.004078148 to 0.03662609)
+## 95CI: 0.006989478 to 0.010891214
 
 #mean risk for 37-50 yo in surgery hospital
-mean(age_risk$risk[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTMENT==1)])
-sd(age_risk$risk[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTMENT==1)])
-t.test(age_risk$risk[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTMENT==1)], sigma.x = 0.015045)
+t.test(age_risk$risk[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTMENT==1)])
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTMENT==1)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>36 & age_risk$AGE<51 & age_risk$DEPARTMENT==1)])
-## 0.0111354 SD=0.01504522 (0.005102554 to 0.04456113)
-## 95CI: 0.007420307 to 0.014850498
+## 0.009373875 (0.004307939 to 0.03699999)
+## 95CI: 0.005034094 to 0.013713656
 
 #mean risk for 51-85 yo in surgery hospital
-mean(age_risk$risk[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTMENT==1)])
-sd(age_risk$risk[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTMENT==1)])
-t.test(age_risk$risk[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTMENT==1)], sigma.x = 0.02125)
+t.test(age_risk$risk[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTMENT==1)])
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTMENT==1)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>50 & age_risk$AGE<86 & age_risk$DEPARTMENT==1)])
-## 0.01726273 SD=0.02125035 (0.007935469 to 0.06781461)
-## 95CI: 0.01221202 to 0.02231345
+## 0.01607429 (0.007497164 to 0.05954354)
+## 95CI: 0.007825699 to 0.024322889
 
 library(readxl)
-surg_age_mean_plot <- read_excel("~/mean for plot.xlsx", sheet = "Age Surgery", col_types = c("text", 
-                                                                      "text", "numeric", "numeric", "numeric", 
-                                                                      "numeric"))
-surg_age_mean_plot$Mean <- round(surg_age_mean_plot$Mean*100, 4)
-surg_age_mean_plot$CIL <- round(surg_age_mean_plot$CIL*100, 4)
-surg_age_mean_plot$CIU <- round(surg_age_mean_plot$CIU*100, 4)
+surg_age_mean_plot <- read_excel("~/mean for plot.xlsx", sheet = "Age Surgery", 
+                                 col_types = c("text", "numeric", "numeric", "numeric", "numeric", "numeric"))
 
-ggplot(surg_age_mean_plot, aes(x=Group, y=Mean))+
-  geom_bar(stat = "identity")+
-  geom_col(position = "dodge") +geom_errorbar(aes(ymin=CIL, ymax=CIU), width=0.2) +
-  geom_text(aes(y=Mean, label=round(Mean,2), vjust=-0.5, hjust=1.5))+
-  theme(plot.subtitle = element_text(vjust = 1), 
-        plot.caption = element_text(vjust = 1), 
-        axis.title = element_text(face = "bold"), 
-        plot.title = element_text(size = 14, face = "bold", hjust = 0.5)) +
+ggplot(surg_age_mean_plot, aes(x=Group, y=round(Mean*100,2)))+
+  geom_bar(stat = "identity")+ geom_col(position="dodge")+
+  geom_errorbar(aes(ymin=CIL*100, ymax=CIU*100),width=0.2)+
+  geom_text(aes(label=round(Mean*100,2), vjust=-1, hjust=2)) + 
+  theme(plot.subtitle = element_text(vjust = 1), plot.caption = element_text(vjust = 1),
+        axis.title = element_text(face = "bold"), plot.title = element_text(size = 15, face = "bold", hjust = 0.5)) +
   labs(title = "Average patient risk by age group in surgery hospital", x = "Age group", y = "Average risk (%)")+
   labs(caption = "Kruskal-Wallis test: P-value =0.2831")
 
@@ -430,53 +407,42 @@ write.csv(surgery_age_risk, file="surgery_age_risk.csv")
 
 #Internal med hospital: 21-42, 43-55, 56-64, 65-84
 #mean risk for 21-42 yo in int med hospital
-mean(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<43 & age_risk$DEPARTMENT==2)])
-sd(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<43 & age_risk$DEPARTMENT==2)])
-t.test(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<43 & age_risk$DEPARTMENT==2)], sigma.x = 0.494485)
+t.test(age_risk$risk[which(age_risk$AGE>20 & age_risk$AGE<43 & age_risk$DEPARTMENT==2)])
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>20 & age_risk$AGE<43 & age_risk$DEPARTMENT==2)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>20 & age_risk$AGE<43 & age_risk$DEPARTMENT==2)])
-## 0.03653981 SD=0.04944854 (0.0170932 to 0.1315349)
-## 95CI: -0.09183026  to 0.16490988
+## 0.02622386 (0.01213595 to 0.03511731)
+## 95CI: 0.01733041 to 0.03511731
 
 #mean risk for 43-55 yo in int med hospital
-mean(age_risk$risk[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTMENT==2)])
-sd(age_risk$risk[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTMENT==2)])
-t.test(age_risk$risk[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTMENT==2)], sigma.x = 0.102205)
+t.test(age_risk$risk[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTMENT==2)])
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTMENT==2)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>42 & age_risk$AGE<56 & age_risk$DEPARTMENT==2)])
-## 0.05466068 SD=0.1022054 (0.0271834 to 0.1681003)
-## 95CI: 0.02858149 to 0.08073988
+## 0.05133871 (0.02553321 to 0.1560658)
+## 95CI: 0.02492666 to 0.07775076
 
 #mean risk for 56-64 yo in int med hospital
-mean(age_risk$risk[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTMENT==2)])
-sd(age_risk$risk[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTMENT==2)])
-t.test(age_risk$risk[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTMENT==2)], sigma.x = 0.040115)
+t.test(age_risk$risk[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTMENT==2)])
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTMENT==2)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>55 & age_risk$AGE<65 & age_risk$DEPARTMENT==2)])
-## 0.04340221 SD=0.04011538 (0.0201348 to 0.1618702)
-## 95CI: 0.03298821 to 0.05381620
+## 0.03959753 (0.01839723 to 0.1467122)
+## 95CI: 0.02830305 to 0.05089200
 
 #mean risk for 65-84 yo in int med hospital
-mean(age_risk$risk[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTMENT==2)])
-sd(age_risk$risk[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTMENT==2)])
-t.test(age_risk$risk[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTMENT==2)], sigma.x = 0.06536967)
+t.test(age_risk$risk[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTMENT==2)])
 mean(age_risk$`sensitivity low`[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTMENT==2)])
 mean(age_risk$`sensitivity high`[which(age_risk$AGE>64 & age_risk$AGE<85 & age_risk$DEPARTMENT==2)])
-## 0.05149226 SD=0.06536967 (0.02431867 to 0.1767604)
-## 95CI: 0.03389332 to 0.06909119
+## 0.03574368 (0.0166873 to 0.1296265)
+## 95CI: 0.02281752 to 0.04866984
 
 library(readxl)
-int_med_age_mean_plot <- read_excel("~/mean for plot.xlsx", sheet = "Age Int Med", col_types = c("text", 
-                                                                         "text", "numeric", "numeric", "numeric", 
-                                                                         "numeric"))
-int_med_age_mean_plot$Mean <- round(int_med_age_mean_plot$Mean*100, 4)
-int_med_age_mean_plot$CIL <- round(int_med_age_mean_plot$CIL*100, 4)
-int_med_age_mean_plot$CIU <- round(int_med_age_mean_plot$CIU*100, 4)
+int_med_age_mean_plot <- read_excel("~/Updated mean for plot.xlsx", sheet = "Age Int Med", 
+                                    col_types = c("text", "numeric", "numeric", "numeric", "numeric", "numeric"))
 
-ggplot(int_med_age_mean_plot, aes(x=Group, y=Mean))+
+
+ggplot(int_med_age_mean_plot, aes(x=Group, y=Mean*100))+
   geom_bar(stat = "identity")+
-  geom_col(position = "dodge") +geom_errorbar(aes(ymin=CIL, ymax=CIU), width=0.2) +
-  geom_text(aes(y=Mean, label=round(Mean,2), vjust=-0.5, hjust=1.5))+
+  geom_col(position = "dodge") +geom_errorbar(aes(ymin=CIL*100, ymax=CIU*100), width=0.2) +
+  geom_text(aes(y=Mean*100, label=round(Mean*100,2), vjust=-0.5, hjust=1.5))+
   theme(plot.subtitle = element_text(vjust = 1), 
         plot.caption = element_text(vjust = 1), 
         axis.title = element_text(face = "bold"), 
@@ -487,277 +453,226 @@ ggplot(int_med_age_mean_plot, aes(x=Group, y=Mean))+
 intmed_age_risk <- age_risk[which(age_risk$DEPARTMENT==2),]
 write.csv(intmed_age_risk, file="intmed_age_risk.csv")
 
-# Kruskal-Wallis test (from STATA): P-value = 0.2527 (not significant)
+# Kruskal-Wallis test (STATA): P-value = 0.2527 (not significant)
 
 
-#### Duration of stay ####
-Traj <- read.csv("C:/Users/Jung/Desktop/Final extractions/Traj.csv", header=TRUE, sep=";")
-library(dplyr)
-#Data frame composed of patient ID, their hospital (surgery or internal medicine), their admission date, their discharge date and their duration of stay (in days)
-PatStay<-rbind.fill(by(Traj,Traj$ID_PATIENT,function(x) return(data.frame(ID_PATIENT=unique(x$ID_PATIENT),
-                                                                          Hospital=min(x$PLACE),
-                                                                          Admission=min(as.Date(x$DATE_ADMISSION, format="%d/%m/%Y")),
-                                                                          Discharge=max(as.Date(x$DATE_DISCHARGE, format="%d/%m/%Y")),
-                                                                          Duration=as.numeric(max(as.Date(x$DATE_DISCHARGE, format="%d/%m/%Y"))-
-                                                                                                min(as.Date(x$DATE_ADMISSION, format="%d/%m/%Y"))))))) 
-mean(PatStay[PatStay$Hospital==1,"Duration"]) #mean duration of patient stay in the surgery hospital
-mean(PatStay[PatStay$Hospital==2,"Duration"]) #mean duration of patient stay in the internal medicine hospital
 
-## patient 356 is missing!!
-## patient 1 and 491 (at least) has wrong input
-
-## MASIVE DATA CORRECTION ##
-# Identify errors
-View(Patient.Trajectories [c("ï..ID_PATIENTTRAJECTORY", "ID_PATIENT", "DATE_ADMISSION", "DATE_DISCHARGE")])
-#correction done on excel
-
-# Trial
+#### Duration of stay// Did not use new data file #### 
 library(readxl)
-traj_trial <- read_excel("C:/Users/Jung/Desktop/Final extractions/trial2.xlsx", 
-                         col_types = c("numeric", "numeric", "numeric","numeric", "numeric", "numeric", 
-                                       "text", "date", "text", "date", "text","text", "text", "text", "numeric"))
-PatStay_trial<-rbind.fill(by(traj_trial,traj_trial$ID_PATIENT,function(x) 
-  return(data.frame(ID_PATIENT=unique(x$ID_PATIENT), Hospital=min(x$PLACE),
-                    Admission=min(as.Date(x$DATE_ADMISSION, format="%d/%m/%Y")),
-                    Discharge=max(as.Date(x$DATE_DISCHARGE, format="%d/%m/%Y")),
-                    Duration=as.numeric(max(as.Date(x$DATE_DISCHARGE, format="%d/%m/%Y"))-min(as.Date(x$DATE_ADMISSION, format="%d/%m/%Y"))))))) 
-
-
-
-# Fixed on new excel spread sheet
-library(readxl)
-traj2 <- read_excel("C:/Users/Jung/Desktop/Final extractions/traj data correction.xlsx")
+traj <- read.csv("C:/Users/Jung/Desktop/Extraction 2018_07_06/Traj.csv", header=TRUE, sep=";")
 #Data frame composed of patient ID, their hospital (surgery or internal medicine), their admission date, their discharge date and their duration of stay (in days)
-PatStay2<-rbind.fill(by(traj2,traj2$ID_PATIENT,function(x) return(data.frame(ID_PATIENT=unique(x$ID_PATIENT),
+library(plyr)
+PatStay<-rbind.fill(by(traj,traj$ID_PATIENT,function(x) return(data.frame(ID_PATIENT=unique(x$ID_PATIENT),
                                                                              Hospital=min(x$PLACE),
                                                                              Admission=min(as.Date(x$DATE_ADMISSION, format="%d/%m/%Y")),
                                                                              Discharge=max(as.Date(x$DATE_DISCHARGE, format="%d/%m/%Y")),
                                                                              Duration=as.numeric(max(as.Date(x$DATE_DISCHARGE, format="%d/%m/%Y"))-
                                                                                                    min(as.Date(x$DATE_ADMISSION, format="%d/%m/%Y"))))))) 
-mean(PatStay2[PatStay2$Hospital==1,"Duration"]) #mean duration of patient stay in the surgery hospital
-mean(PatStay2[PatStay2$Hospital==2,"Duration"]) #mean duration of patient stay in the internal medicine hospital
-
 # descriptive
-summary(PatStay2$Duration) #overall 
-hist(PatStay2$Duration)
-sd(PatStay2$Duration)
-t.test(PatStay2$Duration, sigma.x=4.21317)
+summary(PatStay$Duration) #overall 
+hist(PatStay$Duration)
+t.test(PatStay$Duration) #average of 4.5 days overall (95CI: 4.16 - 4.9)
 
-summary(PatStay2$Duration[which(PatStay2$Hospital==1)]) #surgery hospital
-hist(PatStay2$Duration[which(PatStay2$Hospital==1)])
-mean(PatStay2[PatStay2$Hospital==1,"Duration"]) #mean duration of patient stay in the surgery hospital
-sd(PatStay2[PatStay2$Hospital==1,"Duration"])
-t.test(PatStay2[PatStay2$Hospital==1,"Duration"], sigma.x=3.389674)
-
-summary(PatStay2$Duration[which(PatStay2$Hospital==2)]) #internal med hospital
-hist(PatStay2$Duration[which(PatStay2$Hospital==2)])
-sd(PatStay2[PatStay2$Hospital==2,"Duration"])
-t.test(PatStay2[PatStay2$Hospital==2,"Duration"], sigma.x=4.801544)
-
-#Merge patient_risk with duration of stay data from PatStay2
-duration_risk <- merge(x = patient_risk, y = PatStay2[ , c("ID_PATIENT","Hospital", "Duration")], 
+#Merge patient_risk with duration of stay data from PatStay
+duration_risk <- merge(x = patient_risk, y = PatStay[ , c("ID_PATIENT","Hospital", "Duration")], 
                        by = "ID_PATIENT")
 duration_risk$Hospital <- as.character(duration_risk$Hospital)
 duration_risk$ID_PATIENT <- as.numeric(duration_risk$ID_PATIENT)
 
+#average duration of stay in surgery
+hist(duration_risk$Duration[which(duration_risk$Hospital==1)])
+t.test(duration_risk$Duration[which(duration_risk$Hospital==1)])
+# avg = 3.32 days; 95CI: 2.98 - 3.67
+
+#average duration of stay in int med
+hist(duration_risk$Duration[which(duration_risk$Hospital==2)])
+t.test(duration_risk$Duration[which(duration_risk$Hospital==2)])
+# avg = 6.05 days; 95CI: 5.39 - 6.71
+
+
 #box plot for duration by hospital with outliers
 library(ggplot2)
 ggplot(duration_risk, aes(x=Hospital, y=Duration)) + 
-  geom_boxplot(outlier.colour="red", outlier.shape=4, outlier.size=4) + 
+  geom_boxplot(outlier.colour="red", outlier.shape=4, outlier.size=3) + 
   scale_x_discrete(labels=c("Surgery", "Internal med")) +
   theme(plot.title = element_text(size = 14,face = "bold", hjust = 0.5)) +
   labs(title = "Duration of Stay by Hospitals", x = "Hospitals", y = "Duration (days)") + 
   theme(axis.title = element_text(face = "bold"))
-
-#average duration of stay in surgery
-hist(duration_risk$Duration[which(duration_risk$Hospital==1)])
-mean(duration_risk$Duration[which(duration_risk$Hospital==1)])
-sd(duration_risk$Duration[which(duration_risk$Hospital==1)])
-t.test(duration_risk$Duration[which(duration_risk$Hospital==1)], sigma.x=3.389674)
-# avg = 3.50 days; 95CI: 3.12 - 3.89
-
-#average duration of stay in int med
-hist(duration_risk$Duration[which(duration_risk$Hospital==2)])
-mean(duration_risk$Duration[which(duration_risk$Hospital==2)])
-sd(duration_risk$Duration[which(duration_risk$Hospital==2)])
-t.test(duration_risk$Duration[which(duration_risk$Hospital==2)], signma.x=4.801544)
-# avg = 6.10 days; 95CI: 5.43 - 6.77
 
 # short stays (less than 5 days)
 # medium stays (5-15 days)
 # long stays (more than 15 days)
 
 #short stay
-sd(duration_risk$risk[which(duration_risk$Duration<5)])
-t.test(duration_risk$risk[which(duration_risk$Duration<5)], sigma.x = 2.077974)
+t.test(duration_risk$risk[which(duration_risk$Duration<5)])
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration<5)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration<5)])
+#0.01384156 (0.006370193 to 0.05412498)
+#95CI: 0.01140788 to 0.01627525
 
 #medium stay
-sd(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16)])
-t.test(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16)], sigma.x = 5.075524)
+t.test(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16)])
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration>4 & duration_risk$Duration<16)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration>4 & duration_risk$Duration<16)])
+#0.03582534 (0.01677602 to 0.1284856)
+#95CI: 0.02808417 0.04356651
 
 #long stay
-sd(duration_risk$risk[which(duration_risk$Duration>15)])
-t.test(duration_risk$risk[which(duration_risk$Duration>15)], sigma.x = 18.78582)
+t.test(duration_risk$risk[which(duration_risk$Duration>15)])
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration>15)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration>15)])
+#0.1192958 (0.06267146 to 0.3058305)
+#95CI: 0.003792725 to 0.234798962
 
 # Kruskal-Wallis test (STATA) P-value<0.0001
 
-#plot overall duration of stay
+#plot
 library(readxl)
-alldur_plot <- read_excel("~/mean for plot.xlsx", sheet = "Duration overall", 
+alldur_plot <- read_excel("~/Updated mean for plot.xlsx", sheet = "Duration overall", 
                           col_types = c("text", "numeric", "numeric", "numeric", "numeric", "numeric"))
 
-ggplot(alldur_plot, aes(x=reorder(Duration, Mean), y=Mean, group=1))+
+ggplot(alldur_plot, aes(x=reorder(Duration, Mean), y=Mean*100, group=1))+
   geom_line()+geom_point(size=3, shape=20, fill="black")+
-  geom_text(aes(y=Mean, label=Mean, hjust=1.5, vjust=-0.9))+
-  geom_errorbar(aes(ymin=CIL, ymax=CIU), width=.1) + 
+  geom_text(aes(y=Mean*100, label=round(Mean*100,2), hjust=1.5, vjust=-0.2))+
+  geom_errorbar(aes(ymin=CIL*100, ymax=CIU*100), width=.1) + 
   theme(plot.subtitle = element_text(vjust = 1), 
-    plot.caption = element_text(vjust = 1), 
-    axis.title = element_text(face = "bold"), 
-    plot.title = element_text(size = 15, 
-        face = "bold", hjust = 0.5)) +labs(title = "Risk by duration of stay", 
-    x = "Duration of stay", y = "Risk (%)", 
-    caption = "Kruskal-Wallis test: P-value < 0.0001")
-    
+        plot.caption = element_text(vjust = 1), 
+        axis.title = element_text(face = "bold"), 
+        plot.title = element_text(size = 15,face = "bold", hjust = 0.5)) +
+  labs(title = "Average patient risk by duration of stay", x = "Duration of stay", y = "Average Risk (%)", caption = "Kruskal-Wallis test: P-value < 0.0001")
+
 surgery_duration_risk <- duration_risk[which(duration_risk$Hospital==1),]
 write.csv(surgery_duration_risk, file="surgery_duration_risk.csv")
 
-#Kruskal-Wallis test: P-value < 0.0001
+#Kruskal-Wallis test (STATA): P-value < 0.0001
 
 ##Duration of stay in surgery
 #mean risk for short stay in surgery hospital
-mean(duration_risk$risk[which(duration_risk$Duration<5 & duration_risk$Hospital==1)])
-sd(duration_risk$risk[which(duration_risk$Duration<5 & duration_risk$Hospital==1)])
-t.test(duration_risk$risk[which(duration_risk$Duration<5  & duration_risk$Hospital==1)], sigma.x = 0.009677297)
+t.test(duration_risk$risk[which(duration_risk$Duration<5  & duration_risk$Hospital==1)])
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration<5 & duration_risk$Hospital==1)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration<5 & duration_risk$Hospital==1)])
+#0.00749525 (0.003419174 to 0.03070565)
+#95CI: 0.006364026 to 0.008626475
 
 #mean risk for medium stay in surgery hospital
-mean(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)])
-sd(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)])
-t.test(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)], sigma.x = 0.03482567)
+t.test(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)])
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)])
+#0.02661962 (0.01238972 to 0.09892358)
+#95CI: 0.01712658 to 0.03611267
 
-#mean risk for long stay in surgery hospital
-mean(duration_risk$risk[which(duration_risk$Duration>15 & duration_risk$Hospital==1)])
-sd(duration_risk$risk[which(duration_risk$Duration>15 & duration_risk$Hospital==1)])
-t.test(duration_risk$risk[which(duration_risk$Duration>15  & duration_risk$Hospital==1)], sigma.x = 0.4127112)
-mean(duration_risk$`sensitivity low`[which(duration_risk$Duration>15 & duration_risk$Hospital==1)])
-mean(duration_risk$`sensitivity high`[which(duration_risk$Duration>15 & duration_risk$Hospital==1)])
+
+#No patients in long stay in surgery hospital
 
 #plot
+t.test(duration_risk$risk[which(duration_risk$Duration<5  & duration_risk$Hospital==1)], duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==1)])
+#Two Sample t-test: P-value = 0.0001639
+
 library(readxl)
-surgery_durplot <- read_excel("~/mean for plot.xlsx", sheet = "Duration surgery", 
+surgery_durplot <- read_excel("~/Updated mean for plot.xlsx", sheet = "Duration surgery", 
                               col_types = c("text","numeric", "numeric", "numeric", "numeric", "numeric"))
 
 library(ggplot2)
-ggplot(surgery_durplot, aes(x=reorder(Duration, Mean), y=Mean, group=1))+
+ggplot(surgery_durplot, aes(x=reorder(Duration, Mean), y=Mean*100, group=1))+
   geom_line()+geom_point(size=3, shape=20, fill="black")+
-  geom_text(aes(y=Mean, label=Mean, hjust=1.5, vjust=-0.9))+
-  geom_errorbar(aes(ymin=CIL, ymax=CIU), width=.1) + theme(plot.subtitle = element_text(vjust = 1), 
-    plot.caption = element_text(vjust = 1), 
-    axis.title = element_text(face = "bold"), 
-    plot.title = element_text(size = 15, 
-        face = "bold", hjust = 0.5)) +labs(title = "Average risk by duration in surgery hospital", 
-    x = "Duration", y = "Risk (%)", caption = "Kruskal-Wallis test: P-value < 0.0001")
+  geom_text(aes(y=Mean*100, label=round(Mean*100,2), hjust=1.5))+
+  geom_errorbar(aes(ymin=CIL*100, ymax=CIU*100), width=.1) + 
+  theme(plot.subtitle = element_text(vjust = 1), plot.caption = element_text(vjust = 1), axis.title = element_text(face = "bold"),
+        plot.title = element_text(size = 15, face = "bold", hjust = 0.5)) +
+  labs(title = "Average risk by duration in surgery hospital",  x = "Duration", y = "Average Risk (%)", 
+       caption = "Kruskal-Wallis test: P-value < 0.001")
 
 
-intmed_duration_risk <- duration_risk[which(duration_risk$Hospital==2),]
-write.csv(intmed_duration_risk, file = "intmed_duration_risk.csv")
 
-#Kruskal-Wallis test (STATA): P-value = 0.02
 
-##Duration of stay in int med
 #mean risk for short stay in internal med hospital
-mean(duration_risk$risk[which(duration_risk$Duration<5 & duration_risk$Hospital==2)])
-sd(duration_risk$risk[which(duration_risk$Duration<5 & duration_risk$Hospital==2)])
-t.test(duration_risk$risk[which(duration_risk$Duration<5  & duration_risk$Hospital==2)], sigma.x = 0.03072895)
+t.test(duration_risk$risk[which(duration_risk$Duration<5  & duration_risk$Hospital==2)])
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration<5 & duration_risk$Hospital==2)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration<5 & duration_risk$Hospital==2)])
+#0.02591089 (0.0119824 to 0.09866354)
+#95CI: 0.01957314 to 0.03308997
 
 #mean risk for medium stay in internal med hospital
-mean(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)])
-sd(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)])
-t.test(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)], sigma.x = 0.0598927)
+t.test(duration_risk$risk[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)])
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration>4 & duration_risk$Duration<16 & duration_risk$Hospital==2)])
+#0.04202511 (0.01973006 to 0.1483947)
+#95CI: 0.03079114 to 0.05325908
 
 #mean risk for long stay in internal med hospital
-mean(duration_risk$risk[which(duration_risk$Duration>15 & duration_risk$Hospital==2)])
-sd(duration_risk$risk[which(duration_risk$Duration>15 & duration_risk$Hospital==2)])
-t.test(duration_risk$risk[which(duration_risk$Duration>15  & duration_risk$Hospital==2)], sigma.x = 0.0993748)
+t.test(duration_risk$risk[which(duration_risk$Duration>15  & duration_risk$Hospital==2)])
 mean(duration_risk$`sensitivity low`[which(duration_risk$Duration>15 & duration_risk$Hospital==2)])
 mean(duration_risk$`sensitivity high`[which(duration_risk$Duration>15 & duration_risk$Hospital==2)])
+#0.1192958 (0.06267146 to 0.3058305)
+#95CI: 0.003792725 to 0.234798962
+
+intmed_duration_risk <- duration_risk[which(duration_risk$Hospital==2),]
+write.csv(intmed_duration_risk, file="intmed_duration_risk.csv")
+
+#Kruskal-Wallis test (STATA): P-value = 0.0205
 
 #plot
 library(readxl)
-intmed_durplot <- read_excel("~/mean for plot.xlsx", sheet = "Duration int med", 
-                              col_types = c("text","numeric", "numeric", "numeric", "numeric", "numeric"))
-
+intmed_durplot <- read_excel("~/Updated mean for plot.xlsx", sheet = "Duration int med", 
+                             col_types = c("text","numeric", "numeric", "numeric", "numeric", "numeric"))
 library(ggplot2)
-ggplot(intmed_durplot, aes(x=reorder(Duration, Mean), y=Mean, group=1))+
+ggplot(intmed_durplot, aes(x=reorder(Duration, Mean), y=Mean*100, group=1))+
   geom_line()+geom_point(size=3, shape=20, fill="black")+
-  geom_text(aes(y=Mean, label=Mean, hjust=1.5, vjust=-0.9))+
-  geom_errorbar(aes(ymin=CIL, ymax=CIU), width=.1) +
+  geom_text(aes(y=Mean*100, label=round(Mean*100,2), hjust=1.5, vjust=-0.4))+
+  geom_errorbar(aes(ymin=CIL*100, ymax=CIU*100), width=.1) +
   theme(plot.subtitle = element_text(vjust = 1), 
         plot.caption = element_text(vjust = 1),
         axis.title = element_text(face = "bold"),
         plot.title = element_text(size = 15, face = "bold", hjust = 0.5)) +
-  labs(title = "Average risk by duration in internal medicine hospital",x = "Duration", y = "Risk (%)", 
-       caption = "Kruskal-Wallis test: P-value = 0.0203")
+  labs(title = "Average risk by duration in internal medicine hospital",x = "Duration", y = "Average Risk (%)", 
+       caption = "Kruskal-Wallis test: P-value = 0.0205")
+
+
 
 ##Plot comparing surgergy and int med
 # grouping
 attach(duration_risk)
-duration_risk$Group[Duration<5] <- "Short stay"
-duration_risk$Group[Duration>4 & Duration<16]  <- "Medium stay"
-duration_risk$Group[Duration>15] <- "Long stay"
+duration_risk$Group[Duration<5] <- "1"
+duration_risk$Group[Duration>4 & Duration<16]  <- "2"
+duration_risk$Group[Duration>15] <- "3"
 detach(duration_risk)
+duration_risk$hosp_dur <- paste(duration_risk$Hospital, duration_risk$Group)
+write.csv(duration_risk, file = "duration_risk.csv")
 
 library(wesanderson)
 library(ggplot2)
 library(readxl)
-duration_mean_plot <- read_excel("~/mean for plot.xlsx", sheet = "Duration", col_types = c("text", 
-                                                                   "text", "numeric", "numeric", "numeric", 
-                                                                   "numeric", "numeric"))
-duration_mean_plot$Mean <- round(duration_mean_plot$Mean*100, 2)
-duration_mean_plot$CIL <- round(duration_mean_plot$CIL*100, 2)
-duration_mean_plot$CIU <- round(duration_mean_plot$CIU*100, 2)
+duration_mean_plot <- read_excel("~/Updated mean for plot.xlsx", sheet = "Duration", 
+                                 col_types = c("text", "text", "numeric", "numeric", "numeric", "numeric", "numeric"))
 
-ggplot(duration_mean_plot, aes(x=Group, y=Mean, fill=Hospital))+
+ggplot(duration_mean_plot, aes(x=Group, y=Mean*100, fill=Hospital))+
   geom_bar(stat = "identity", position = "dodge")+
-  geom_text(position=position_dodge(width = 1), aes(y=Mean, label=Mean, hjust=1.2, vjust=-0.4))+
+  geom_text(position=position_dodge(width = 1), aes(y=Mean*100, label=round(Mean*100,2), hjust=1.2, vjust=-0.4))+
   geom_col(position = dodge)+
-  geom_errorbar(aes(ymin=CIL, ymax=CIU), position = dodge, width=0.25) +
+  geom_errorbar(aes(ymin=CIL*100, ymax=CIU*100), position = dodge, width=0.25) +
   scale_fill_manual(values=wes_palette(n=2, name="Moonrise2"))+
   theme(plot.subtitle = element_text(vjust = 1), 
-    plot.caption = element_text(vjust = 1), 
-    axis.title = element_text(face = "bold"), 
-    plot.title = element_text(size = 14, 
-        face = "bold", hjust = 0.5)) +labs(title = "Average risk by duration of stay", 
-    x = "Duration of stay", y = "Average risk (%)", 
-    fill = "Hospitals")+labs(caption = "Kruskal-Wallis test: P-value < 0.0001")
+        plot.caption = element_text(vjust = 1), 
+        axis.title = element_text(face = "bold"), 
+        plot.title = element_text(size = 14,face = "bold", hjust = 0.5)) +
+  labs(title = "Average risk by duration of stay", x = "Duration of stay", y = "Average risk (%)", fill = "Hospitals")+
+  labs(caption = "Kruskal-Wallis test: P-value < 0.0001")
 
 pd <- position_dodge(0.1)
-duration_plot <- ggplot(duration_mean_plot, aes(x=reorder(Group, Mean), y=Mean, group=Hospital))+
+duration_plot <- ggplot(duration_mean_plot, aes(x=reorder(Group, Mean), y=Mean*100, group=Hospital))+
   geom_line(aes(color=Hospital), size=1.5, position=position_dodge(0.1))+geom_point(size=3, shape=20, fill="black", position = position_dodge(0.1))+
-  geom_text(aes(y=Mean, label=Mean, hjust=1.5), position = position_dodge(0.1))+
-  geom_errorbar(aes(ymin=CIL, ymax=CIU), width=.1, position = position_dodge(0.1)) +
+  geom_text(aes(y=Mean*100, label=round(Mean*100, 2), hjust=1.5, vjust=1), position = position_dodge(0.1))+
+  geom_errorbar(aes(ymin=CIL*100, ymax=CIU*100), width=.1, position = position_dodge(0.1)) +
   theme(plot.subtitle = element_text(vjust = 1), 
         plot.caption = element_text(vjust = 1),
         axis.title = element_text(face = "bold"),
         plot.title = element_text(size = 15, face = "bold", hjust = 0.5)) +
-  labs(title = "Average risk by duration of stay",x = "Duration", y = "Risk (%)", caption = "Kruskal-Wallis test: P-value < 0.0001")
+  labs(title = "Average patient risk by duration of stay",x = "Duration", y = "Average Risk (%)", caption = "Kruskal-Wallis test: P-value < 0.0001")
 
 duration_plot+ scale_color_manual(values=c("#798E87", "#C27D38"))
 #Kruskal-Wallis test (STATA): P-value < 0.0001
 
+
 #### Departments ####
 dept_risk <- merge(patient_risk, Patient.Trajectories[ , c("ID_PATIENT", "DEPARTMENT")], by = "ID_PATIENT")
 
@@ -767,210 +682,550 @@ i=28
 for(i in department){
   dept_mean_plot[i, "departments"] <- department[i]
   dept_mean_plot[i, "mean"] <- mean(dept_risk$risk[which(dept_risk$DEPARTMENT==i)])
-  dept_mean_plot[i, "sens low"] <- mean(dept_risk$`sensitivity low`[which(dept_risk$DEPARTMENT==i)])
-  dept_mean_plot[i, "sens high"] <- mean(dept_risk$`sensitivity high`[which(dept_risk$DEPARTMENT==i)])
-}
-dept_mean_plot$departments=department
-dept_mean_plot$departments <- factor(dept_mean_plot$departments, 
-                               levels = c(-1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 
-                                          18, 19, 20, 21, 22, 23, 24, 25, 26, 27),
-                               labels = c("Data not available", "GIT and endoscopy", "Endocrinology", 
-                                          "Immunology and allergy","Hematology", "Rheumatology", "Geriatric", 
-                                          "Chest", "Nephrology", "Cardiology", "Cardiac catheterization", 
-                                          "Neurology", "Tropical", "Dermatology", "Ophthalmology","Dialysis", 
-                                          "ICU", "Orthopedics", "General surgery", "ER building", "Neuro surgery",
-                                          "Urosurgery", "Burn", "ENT", "Plastic surgery", "OR", "Radiology", 
-                                          "Clinical pathology"))
-
-ggplot(dept_mean_plot, aes(x=reorder(departments, mean), y=mean))+
-  geom_bar(stat = "identity", position = "dodge")+coord_flip() + 
-  geom_text(aes(y=mean, label=round(mean,4), hjust=-0.02))+
-  theme(plot.subtitle = element_text(vjust = 1), 
-    plot.caption = element_text(vjust = 1), 
-    axis.title = element_text(face = "bold"), 
-    plot.title = element_text(size = 15, 
-        face = "bold", hjust = 0.5)) +labs(title = "Average risk in departments", x = "Departments", 
-    y = "Average risk")
+  dept_mean_plot[i, "CILow"] <- (t.test(dept_risk$risk[which(dept_risk2$DEPARTMENT==i)], 
+                                         sigma.x = (sd(dept_risk$risk[which(dept_risk$DEPARTMENT==i)])), 
+                                         na.action(na.omit)))$conf.int[1]
   
-## with 95 Confidence interval
-department <- names(table(Patient.Trajectories$DEPARTMENT))
-
-dept_risk2 <- data.frame(dept_risk)
-dept_risk2 <- dept_risk2[-c(3326),]
-department <- department[-23]
-
-dept_mean_plot2 <- setNames(data.frame(matrix(ncol=6, nrow=27)), c("departments", "mean", "CILow", "CIUpper", "sens low", "sens high"))
-for(i in department){
-  dept_mean_plot2[i, "departments"] <- department[i]
-  dept_mean_plot2[i, "mean"] <- mean(dept_risk2$risk[which(dept_risk2$DEPARTMENT==i)])
-  dept_mean_plot2[i, "CILow"] <- (t.test(dept_risk2$risk[which(dept_risk2$DEPARTMENT==i)],
-                                         sigma.x=(sd(dept_risk2$risk[which(dept_risk2$DEPARTMENT==i)]))))$conf.int[1]
-  dept_mean_plot2[i, "CIUpper"] <- (t.test(dept_risk2$risk[which(dept_risk2$DEPARTMENT==i)],
-                                           sigma.x=(sd(dept_risk2$risk[which(dept_risk2$DEPARTMENT==i)]))))$conf.int[2]
-  dept_mean_plot2[i, "sens low"] <- mean(dept_risk2$`sensitivity.low`[which(dept_risk2$DEPARTMENT==i)])
-  dept_mean_plot2[i, "sens high"] <- mean(dept_risk2$`sensitivity.high`[which(dept_risk2$DEPARTMENT==i)])
-}
-
-dept_mean_plot2$departments <- c("GIT and endoscopy 1&2", "Endocrinology", 
-                                 "Immunology and allergy","Hematology", "Rheumatology", "Geriatric", 
-                                 "Chest", "Nephrology", "Cardiology", "Cardiac catheterization", 
-                                 "Neurology", "Tropical", "Dermatology", "Ophthalmology","Dialysis", 
-                                 "ICU", "Orthopedics", "General surgery", "ER building", "Neuro surgery",
-                                 "Urosurgery", "Burn", "ENT", "Plastic surgery", "OR", "Radiology", 
-                                 "Clinical pathology", "Data not available")
-
-#add the mean for dept 22
-dept_mean_plot2[22,2] = round(mean(dept_risk$risk[which(dept_risk$DEPARTMENT==22)])*100,2)
-
-#make into percentage with 2 decimal points
-dept_mean_plot2$mean <- round(dept_mean_plot2$mean*100,2)
-dept_mean_plot2$CILow <- round(dept_mean_plot2$CILow*100,2)
-dept_mean_plot2$CIUpper <- round(dept_mean_plot2$CIUpper*100,2)
-dept_mean_plot2$`sens low` <- round(dept_mean_plot2$`sens low`*100,2)
-dept_mean_plot2$`sens high` <- round(dept_mean_plot2$`sens high`*100,2)
-
-## plot
-library(ggplot2)
-ggplot(dept_mean_plot2, aes(x=reorder(departments, mean), y=mean))+
-  geom_bar(stat = "identity", position = "dodge")+coord_flip() + 
-  geom_errorbar(aes(ymin=CILow, ymax=CIUpper), width = 0.25)+
-  geom_text(aes(y=mean, label=mean, hjust=-1))+
-  theme(plot.subtitle = element_text(vjust = 1), 
-        plot.caption = element_text(vjust = 1), 
-        axis.title = element_text(face = "bold"), 
-        plot.title = element_text(size = 15, 
-                                  face = "bold", hjust = 0.5)) +labs(title = "Average risk in departments", x = "Departments", 
-                                                                     y = "Average risk (%)")
-
-#### Education #####
-#Merge patient_risk with education data from Patient.Questinnaire
-educ_risk <- merge(patient_risk, Patient.Questionnaire[ , c("ID_PATIENT","EDUCATION_LEVEL", "DEPARTMENT")], by = "ID_PATIENT")
-
-#Illiterate
-mean(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==1)])
-sd(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==1)])
-t.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==1)], sigma.x = 0.05631366)
-mean(age_risk$`sensitivity low`[which(educ_risk$EDUCATION_LEVEL==1)])
-mean(age_risk$`sensitivity high`[which(educ_risk$EDUCATION_LEVEL==1)])
-
-#Can read and write w/o formal education
-mean(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==2)])
-sd(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==2)])
-t.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==2)], sigma.x = 0.07913644)
-mean(age_risk$`sensitivity low`[which(educ_risk$EDUCATION_LEVEL==2)])
-mean(age_risk$`sensitivity high`[which(educ_risk$EDUCATION_LEVEL==2)])
-
-#Primary school
-mean(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==3)])
-sd(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==3)])
-t.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==3)], sigma.x = 0.04191415)
-mean(age_risk$`sensitivity low`[which(educ_risk$EDUCATION_LEVEL==3)])
-mean(age_risk$`sensitivity high`[which(educ_risk$EDUCATION_LEVEL==3)])
-
-#Preparatory school
-mean(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==4)])
-sd(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==4)])
-t.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==4)], sigma.x = 0.02097112)
-mean(age_risk$`sensitivity low`[which(educ_risk$EDUCATION_LEVEL==4)])
-mean(age_risk$`sensitivity high`[which(educ_risk$EDUCATION_LEVEL==4)])
-
-#Secondary school
-mean(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==5)])
-sd(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==5)])
-t.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==5)], sigma.x = 0.02976827)
-mean(age_risk$`sensitivity low`[which(educ_risk$EDUCATION_LEVEL==5)])
-mean(age_risk$`sensitivity high`[which(educ_risk$EDUCATION_LEVEL==5)])
-
-#Higher education
-mean(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==6)])
-sd(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==6)])
-t.test(educ_risk$risk[which(educ_risk$EDUCATION_LEVEL==6)], sigma.x = 0.03715145)
-mean(age_risk$`sensitivity low`[which(educ_risk$EDUCATION_LEVEL==6)])
-mean(age_risk$`sensitivity high`[which(educ_risk$EDUCATION_LEVEL==6)])
-
-#### Departments ####
-dept_risk <- merge(patient_risk, Patient.Trajectories[ , c("ID_PATIENT", "DEPARTMENT")], by = "ID_PATIENT")
-
-dept_mean_plot <- data.frame(NULL)
-i=28
-for(i in department){
-  dept_mean_plot[i, "departments"] <- department[i]
-  dept_mean_plot[i, "mean"] <- mean(dept_risk$risk[which(dept_risk$DEPARTMENT==i)])
+  dept_mean_plot[i, "CIUpper"] <- (t.test(dept_risk$risk[which(dept_risk$DEPARTMENT==i)], 
+                                           sigma.x = (sd(dept_risk$risk[which(dept_risk$DEPARTMENT==i)])), 
+                                           na.action(na.omit)))$conf.int[2]
   dept_mean_plot[i, "sens low"] <- mean(dept_risk$`sensitivity low`[which(dept_risk$DEPARTMENT==i)])
   dept_mean_plot[i, "sens high"] <- mean(dept_risk$`sensitivity high`[which(dept_risk$DEPARTMENT==i)])
 }
 
+
 dept_mean_plot$departments=department
 dept_mean_plot$departments <- factor(dept_mean_plot$departments, 
-                                     levels = c(-1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 
-                                                18, 19, 20, 21, 22, 23, 24, 25, 26, 27),
-                                     labels = c("Data not available", "GIT and endoscopy", "Endocrinology", 
-                                                "Immunology and allergy","Hematology", "Rheumatology", "Geriatric", 
-                                                "Chest", "Nephrology", "Cardiology", "Cardiac catheterization", 
-                                                "Neurology", "Tropical", "Dermatology", "Ophthalmology","Dialysis", 
-                                                "ICU", "Orthopedics", "General surgery", "ER building", "Neuro surgery",
-                                                "Urosurgery", "Burn", "ENT", "Plastic surgery", "OR", "Radiology", 
-                                                "Clinical pathology"))
-dept_mean_plot$mean <- round(dept_mean_plot$mean*100,2)
-dept_mean_plot$`sens low` <- round(dept_mean_plot$`sens low`*100,2)
-dept_mean_plot$`sens high` <- round(dept_mean_plot$`sens high`*100,2)
+                                     levels = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 
+                                                23, 24, 25, 26, 27,28,29,30), 
+                                     labels = c("GIT and endoscopy 1&2", "Endocrinology", "Immunology and allergy",
+                                                "Hematology", "Rheumatology", "Geiatric", "Chest", "Nephrology", "Cardiology",
+                                                "Cardiac catheterization", "Neurology", "Tropical", "Dermatology", "Ophthalmology", 
+                                                "Dialysis", "ICU", "Orthopedics", "General surgery", "ER building", "Neuro surgery",
+                                                "Urosurgery", "Burn", "ENT", "Plastic surgery", "OR", "Radiology", "Clinical pathology",
+                                                "Endoscopy", "Physical medicine", "ER"))
+
+
 library(ggplot2)
-ggplot(dept_mean_plot, aes(x=reorder(departments, mean), y=mean))+
+ggplot(dept_mean_plot, aes(x=reorder(departments, mean), y=mean*100))+
   geom_bar(stat = "identity", position = "dodge")+coord_flip() + 
-  geom_text(aes(y=mean, label=round(mean,4), hjust=-0.02))+
+  geom_errorbar(aes(ymin=CILow*100, ymax=CIUpper*100), width=0.2) +
+  geom_text(aes(y=mean*100, label=round(mean*100,2), hjust=-0.25, vjust=-0.22), size=3.2)+
   theme(plot.subtitle = element_text(vjust = 1), 
         plot.caption = element_text(vjust = 1), 
         axis.title = element_text(face = "bold"), 
-        plot.title = element_text(size = 15, 
-                                  face = "bold", hjust = 0.5)) +labs(title = "Average risk in departments", x = "Departments", 
-                                                                     y = "Average risk (%)")
+        plot.title = element_text(size = 15,face = "bold", hjust = 0.5)) +
+  labs(title = "Average risk in departments", x = "Departments", y = "Average risk (%)")
 
-department <- names(table(Patient.Trajectories$DEPARTMENT))
+#Check dept 1 with plot
+t.test(dept_risk$risk[which(dept_risk$DEPARTMENT==1)]) #6.043%
+mean(dept_risk$'sensitivity low'[which(dept_risk$DEPARTMENT==1)])
+mean(dept_risk$'sensitivity high'[which(dept_risk$DEPARTMENT==1)])
 
-dept_risk2 <- data.frame(dept_risk)
-dept_risk2 <- dept_risk2[-c(3326),]
-department <- department[-23]
 
-dept_mean_plot2 <- setNames(data.frame(matrix(ncol=6, nrow=27)), c("departments", "mean", "CILow", "CIUpper", "sens low", "sens high"))
-for(i in department){
-  dept_mean_plot2[i, "departments"] <- department[i]
-  dept_mean_plot2[i, "mean"] <- mean(dept_risk2$risk[which(dept_risk2$DEPARTMENT==i)])
-  dept_mean_plot2[i, "CILow"] <- (t.test(dept_risk2$risk[which(dept_risk2$DEPARTMENT==i)],
-                                         sigma.x=(sd(dept_risk2$risk[which(dept_risk2$DEPARTMENT==i)]))))$conf.int[1]
-  dept_mean_plot2[i, "CIUpper"] <- (t.test(dept_risk2$risk[which(dept_risk2$DEPARTMENT==i)],
-                                           sigma.x=(sd(dept_risk2$risk[which(dept_risk2$DEPARTMENT==i)]))))$conf.int[2]
-  dept_mean_plot2[i, "sens low"] <- mean(dept_risk2$`sensitivity.low`[which(dept_risk2$DEPARTMENT==i)])
-  dept_mean_plot2[i, "sens high"] <- mean(dept_risk2$`sensitivity.high`[which(dept_risk2$DEPARTMENT==i)])
+
+#### Department-specific risk ####
+#Doing one dept by one dept because in a rush, no time
+#mpatient_procedures from trajectory analysis script
+
+#Department 1 GIT and Endoscopy 1&2
+procedures_dept1 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==1),]
+patients_dept1 <- as.character(names(table(procedures_dept1$ID_PATIENT)))
+dept1 <- data.frame(NULL)
+i=4
+for(i in patients_dept1){
+  dept1[i, "ID_PATIENT"] <- patients_dept1[i]
+  dept1[i, "risk"] <- riskassessment(procedures_dept1$pp_transmission[which(procedures_dept1$ID_PATIENT==i)], procedures_dept1$prevalence[which(procedures_dept1$ID_PATIENT==i)])
+  dept1[i, "sensitivity low"] <- riskassessment(procedures_dept1$pp_lowsensitivity[which(procedures_dept1$ID_PATIENT==i)], procedures_dept1$prevalence[which(procedures_dept1$ID_PATIENT==i)])
+  dept1[i, "sensitivity high"] <- riskassessment(procedures_dept1$pp_highsensitivity[which(procedures_dept1$ID_PATIENT==i)], procedures_dept1$prevalence[which(procedures_dept1$ID_PATIENT==i)])
 }
+t.test(dept1$risk) #0.0518698; 95CI: 0.03601509 to 0.06772452
+mean(dept1$`sensitivity low`) #0.02409389
+mean(dept1$`sensitivity high`) #0.1924433
 
-dept_mean_plot2$departments <- c("GIT and endoscopy 1&2", "Endocrinology", 
-                                 "Immunology and allergy","Hematology", "Rheumatology", "Geriatric", 
-                                 "Chest", "Nephrology", "Cardiology", "Cardiac catheterization", 
-                                 "Neurology", "Tropical", "Dermatology", "Ophthalmology","Dialysis", 
-                                 "ICU", "Orthopedics", "General surgery", "ER building", "Neuro surgery",
-                                 "Urosurgery", "Burn", "ENT", "Plastic surgery", "OR", "Radiology", 
-                                 "Clinical pathology", "Data not available")
+#Department 2 Endocrinology
+procedures_dept2 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==2),]
+patients_dept2 <- as.character(names(table(procedures_dept2$ID_PATIENT)))
+dept2 <- data.frame(NULL)
+i=4
+for(i in patients_dept2){
+  dept2[i, "ID_PATIENT"] <- patients_dept2[i]
+  dept2[i, "risk"] <- riskassessment(procedures_dept2$pp_transmission[which(procedures_dept2$ID_PATIENT==i)], procedures_dept2$prevalence[which(procedures_dept2$ID_PATIENT==i)])
+  dept2[i, "sensitivity low"] <- riskassessment(procedures_dept2$pp_lowsensitivity[which(procedures_dept2$ID_PATIENT==i)], procedures_dept2$prevalence[which(procedures_dept2$ID_PATIENT==i)])
+  dept2[i, "sensitivity high"] <- riskassessment(procedures_dept2$pp_highsensitivity[which(procedures_dept2$ID_PATIENT==i)], procedures_dept2$prevalence[which(procedures_dept2$ID_PATIENT==i)])
+}
+t.test(dept2$risk) #0.02878316; 95CI: 0.01855320 to 0.03901311
+mean(dept2$`sensitivity low`) #0.01328979
+mean(dept2$`sensitivity high`) #0.110227
 
-#add the mean for dept 22
-dept_mean_plot2[22,2] = round(mean(dept_risk$risk[which(dept_risk$DEPARTMENT==22)])*100,2)
+#Department 3 Immunology and allergy
+procedures_dept3 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==3),]
+patients_dept3 <- as.character(names(table(procedures_dept3$ID_PATIENT)))
+dept3 <- data.frame(NULL)
+i=4
+for(i in patients_dept3){
+  dept3[i, "ID_PATIENT"] <- patients_dept3[i]
+  dept3[i, "risk"] <- riskassessment(procedures_dept3$pp_transmission[which(procedures_dept3$ID_PATIENT==i)], procedures_dept3$prevalence[which(procedures_dept3$ID_PATIENT==i)])
+  dept3[i, "sensitivity low"] <- riskassessment(procedures_dept3$pp_lowsensitivity[which(procedures_dept3$ID_PATIENT==i)], procedures_dept3$prevalence[which(procedures_dept3$ID_PATIENT==i)])
+  dept3[i, "sensitivity high"] <- riskassessment(procedures_dept3$pp_highsensitivity[which(procedures_dept3$ID_PATIENT==i)], procedures_dept3$prevalence[which(procedures_dept3$ID_PATIENT==i)])
+}
+t.test(dept3$risk) #0.01434023; 95CI: 0.00923245 to 0.01944801
+mean(dept3$`sensitivity low`) #0.006564007
+mean(dept3$`sensitivity high`) #0.05757777
 
-#make into percentage with 2 decimal points
-dept_mean_plot2$mean <- round(dept_mean_plot2$mean*100,2)
-dept_mean_plot2$CILow <- round(dept_mean_plot2$CILow*100,2)
-dept_mean_plot2$CIUpper <- round(dept_mean_plot2$CIUpper*100,2)
-dept_mean_plot2$`sens low` <- round(dept_mean_plot2$`sens low`*100,2)
-dept_mean_plot2$`sens high` <- round(dept_mean_plot2$`sens high`*100,2)
+#Department 4 Hematology
+procedures_dept4 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==4),]
+patients_dept4 <- as.character(names(table(procedures_dept4$ID_PATIENT)))
+dept4 <- data.frame(NULL)
+i=4
+for(i in patients_dept4){
+  dept4[i, "ID_PATIENT"] <- patients_dept4[i]
+  dept4[i, "risk"] <- riskassessment(procedures_dept4$pp_transmission[which(procedures_dept4$ID_PATIENT==i)], procedures_dept4$prevalence[which(procedures_dept4$ID_PATIENT==i)])
+  dept4[i, "sensitivity low"] <- riskassessment(procedures_dept4$pp_lowsensitivity[which(procedures_dept4$ID_PATIENT==i)], procedures_dept4$prevalence[which(procedures_dept4$ID_PATIENT==i)])
+  dept4[i, "sensitivity high"] <- riskassessment(procedures_dept4$pp_highsensitivity[which(procedures_dept4$ID_PATIENT==i)], procedures_dept4$prevalence[which(procedures_dept4$ID_PATIENT==i)])
+}
+t.test(dept4$risk) #0
+mean(dept4$`sensitivity low`) #0
+mean(dept4$`sensitivity high`) #0
 
-## plot with error bar
+#Department 5 Rheumatology
+procedures_dept5 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==5),]
+patients_dept5 <- as.character(names(table(procedures_dept5$ID_PATIENT)))
+dept5 <- data.frame(NULL)
+i=4
+for(i in patients_dept5){
+  dept5[i, "ID_PATIENT"] <- patients_dept5[i]
+  dept5[i, "risk"] <- riskassessment(procedures_dept5$pp_transmission[which(procedures_dept5$ID_PATIENT==i)], procedures_dept5$prevalence[which(procedures_dept5$ID_PATIENT==i)])
+  dept5[i, "sensitivity low"] <- riskassessment(procedures_dept5$pp_lowsensitivity[which(procedures_dept5$ID_PATIENT==i)], procedures_dept5$prevalence[which(procedures_dept5$ID_PATIENT==i)])
+  dept5[i, "sensitivity high"] <- riskassessment(procedures_dept5$pp_highsensitivity[which(procedures_dept5$ID_PATIENT==i)], procedures_dept5$prevalence[which(procedures_dept5$ID_PATIENT==i)])
+}
+t.test(dept5$risk) #0
+mean(dept5$`sensitivity low`) #0
+mean(dept5$`sensitivity high`) #0
+
+#Department 6 Geriatric
+procedures_dept6 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==6),]
+patients_dept6 <- as.character(names(table(procedures_dept6$ID_PATIENT)))
+dept6 <- data.frame(NULL)
+i=4
+for(i in patients_dept6){
+  dept6[i, "ID_PATIENT"] <- patients_dept6[i]
+  dept6[i, "risk"] <- riskassessment(procedures_dept6$pp_transmission[which(procedures_dept6$ID_PATIENT==i)], procedures_dept6$prevalence[which(procedures_dept6$ID_PATIENT==i)])
+  dept6[i, "sensitivity low"] <- riskassessment(procedures_dept6$pp_lowsensitivity[which(procedures_dept6$ID_PATIENT==i)], procedures_dept6$prevalence[which(procedures_dept6$ID_PATIENT==i)])
+  dept6[i, "sensitivity high"] <- riskassessment(procedures_dept6$pp_highsensitivity[which(procedures_dept6$ID_PATIENT==i)], procedures_dept6$prevalence[which(procedures_dept6$ID_PATIENT==i)])
+}
+t.test(dept6$risk) #0.02359798; 95CI 0.003332336 to 0.043863623
+mean(dept6$`sensitivity low`) #0.01081886
+mean(dept6$`sensitivity high`) #0.09386531
+
+#Department 7 Chest
+procedures_dept7 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==7),]
+patients_dept7 <- as.character(names(table(procedures_dept7$ID_PATIENT)))
+dept7 <- data.frame(NULL)
+i=4
+for(i in patients_dept7){
+  dept7[i, "ID_PATIENT"] <- patients_dept7[i]
+  dept7[i, "risk"] <- riskassessment(procedures_dept7$pp_transmission[which(procedures_dept7$ID_PATIENT==i)], procedures_dept7$prevalence[which(procedures_dept7$ID_PATIENT==i)])
+  dept7[i, "sensitivity low"] <- riskassessment(procedures_dept7$pp_lowsensitivity[which(procedures_dept7$ID_PATIENT==i)], procedures_dept7$prevalence[which(procedures_dept7$ID_PATIENT==i)])
+  dept7[i, "sensitivity high"] <- riskassessment(procedures_dept7$pp_highsensitivity[which(procedures_dept7$ID_PATIENT==i)], procedures_dept7$prevalence[which(procedures_dept7$ID_PATIENT==i)])
+}
+t.test(dept7$risk) #0
+mean(dept7$`sensitivity low`) #0
+mean(dept7$`sensitivity high`) #0
+
+#Department 8 Nephrology
+procedures_dept8 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==8),]
+patients_dept8 <- as.character(names(table(procedures_dept8$ID_PATIENT)))
+dept8 <- data.frame(NULL)
+i=4
+for(i in patients_dept8){
+  dept8[i, "ID_PATIENT"] <- patients_dept8[i]
+  dept8[i, "risk"] <- riskassessment(procedures_dept8$pp_transmission[which(procedures_dept8$ID_PATIENT==i)], procedures_dept8$prevalence[which(procedures_dept8$ID_PATIENT==i)])
+  dept8[i, "sensitivity low"] <- riskassessment(procedures_dept8$pp_lowsensitivity[which(procedures_dept8$ID_PATIENT==i)], procedures_dept8$prevalence[which(procedures_dept8$ID_PATIENT==i)])
+  dept8[i, "sensitivity high"] <- riskassessment(procedures_dept8$pp_highsensitivity[which(procedures_dept8$ID_PATIENT==i)], procedures_dept8$prevalence[which(procedures_dept8$ID_PATIENT==i)])
+}
+t.test(dept8$risk) #0.01037715; 95CI: 0.004000665 to 0.016753625
+mean(dept8$`sensitivity low`) #0.00475387
+mean(dept8$`sensitivity high`) #0.04078518
+
+#Department 9 Cardiology
+procedures_dept9 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==9),]
+patients_dept9 <- as.character(names(table(procedures_dept9$ID_PATIENT)))
+dept9 <- data.frame(NULL)
+i=4
+for(i in patients_dept9){
+  dept9[i, "ID_PATIENT"] <- patients_dept9[i]
+  dept9[i, "risk"] <- riskassessment(procedures_dept9$pp_transmission[which(procedures_dept9$ID_PATIENT==i)], procedures_dept9$prevalence[which(procedures_dept9$ID_PATIENT==i)])
+  dept9[i, "sensitivity low"] <- riskassessment(procedures_dept9$pp_lowsensitivity[which(procedures_dept9$ID_PATIENT==i)], procedures_dept9$prevalence[which(procedures_dept9$ID_PATIENT==i)])
+  dept9[i, "sensitivity high"] <- riskassessment(procedures_dept9$pp_highsensitivity[which(procedures_dept9$ID_PATIENT==i)], procedures_dept9$prevalence[which(procedures_dept9$ID_PATIENT==i)])
+}
+t.test(dept9$risk) #0.02065905; 95CI: 0.003060587 to 0.038257504
+mean(dept9$`sensitivity low`) #0.009511807
+mean(dept9$`sensitivity high`) #0.08042042
+
+#Department 10 Cardiac catheterization - no procedures done
+
+#Department 11 Neurology
+procedures_dept11 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==11),]
+patients_dept11 <- as.character(names(table(procedures_dept11$ID_PATIENT)))
+dept11 <- data.frame(NULL)
+i=4
+for(i in patients_dept11){
+  dept11[i, "ID_PATIENT"] <- patients_dept11[i]
+  dept11[i, "risk"] <- riskassessment(procedures_dept11$pp_transmission[which(procedures_dept11$ID_PATIENT==i)], procedures_dept11$prevalence[which(procedures_dept11$ID_PATIENT==i)])
+  dept11[i, "sensitivity low"] <- riskassessment(procedures_dept11$pp_lowsensitivity[which(procedures_dept11$ID_PATIENT==i)], procedures_dept11$prevalence[which(procedures_dept11$ID_PATIENT==i)])
+  dept11[i, "sensitivity high"] <- riskassessment(procedures_dept11$pp_highsensitivity[which(procedures_dept11$ID_PATIENT==i)], procedures_dept11$prevalence[which(procedures_dept11$ID_PATIENT==i)])
+}
+t.test(dept11$risk) #0.02303866; 95CI -0.01084799 to 0.05692532
+mean(dept11$`sensitivity low`) #0.01061164
+mean(dept11$`sensitivity high`) #0.08936194
+ 
+#Department 12 Tropical
+procedures_dept12 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==12),]
+patients_dept12 <- as.character(names(table(procedures_dept12$ID_PATIENT)))
+dept12 <- data.frame(NULL)
+i=4
+for(i in patients_dept12){
+  dept12[i, "ID_PATIENT"] <- patients_dept12[i]
+  dept12[i, "risk"] <- riskassessment(procedures_dept12$pp_transmission[which(procedures_dept12$ID_PATIENT==i)], procedures_dept12$prevalence[which(procedures_dept12$ID_PATIENT==i)])
+  dept12[i, "sensitivity low"] <- riskassessment(procedures_dept12$pp_lowsensitivity[which(procedures_dept12$ID_PATIENT==i)], procedures_dept12$prevalence[which(procedures_dept12$ID_PATIENT==i)])
+  dept12[i, "sensitivity high"] <- riskassessment(procedures_dept12$pp_highsensitivity[which(procedures_dept12$ID_PATIENT==i)], procedures_dept12$prevalence[which(procedures_dept12$ID_PATIENT==i)])
+}
+t.test(dept12$risk) #0.1116948; 95CI: 0.06764073 to 0.15574892
+mean(dept12$`sensitivity low`) #0.05486985
+mean(dept12$`sensitivity high`) #0.3423655
+
+#Department 13 Dermatology - no procedures done
+
+#Department 14 Ophthalmology
+procedures_dept14 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==14),]
+patients_dept14 <- as.character(names(table(procedures_dept14$ID_PATIENT)))
+dept14 <- data.frame(NULL)
+i=4
+for(i in patients_dept14){
+  dept14[i, "ID_PATIENT"] <- patients_dept14[i]
+  dept14[i, "risk"] <- riskassessment(procedures_dept14$pp_transmission[which(procedures_dept14$ID_PATIENT==i)], procedures_dept14$prevalence[which(procedures_dept14$ID_PATIENT==i)])
+  dept14[i, "sensitivity low"] <- riskassessment(procedures_dept14$pp_lowsensitivity[which(procedures_dept14$ID_PATIENT==i)], procedures_dept14$prevalence[which(procedures_dept14$ID_PATIENT==i)])
+  dept14[i, "sensitivity high"] <- riskassessment(procedures_dept14$pp_highsensitivity[which(procedures_dept14$ID_PATIENT==i)], procedures_dept14$prevalence[which(procedures_dept14$ID_PATIENT==i)])
+}
+t.test(dept14$risk) #0.01058912; 95CI: 0.004432273 to 0.016745965
+mean(dept14$`sensitivity low`) #0.004879091
+mean(dept14$`sensitivity high`) #0.04119683
+
+#Department 15 Dialysis - no procedures done
+
+#Department 16 ICU
+procedures_dept16 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==16),]
+patients_dept16 <- as.character(names(table(procedures_dept16$ID_PATIENT)))
+dept16 <- data.frame(NULL)
+i=4
+for(i in patients_dept16){
+  dept16[i, "ID_PATIENT"] <- patients_dept16[i]
+  dept16[i, "risk"] <- riskassessment(procedures_dept16$pp_transmission[which(procedures_dept16$ID_PATIENT==i)], procedures_dept16$prevalence[which(procedures_dept16$ID_PATIENT==i)])
+  dept16[i, "sensitivity low"] <- riskassessment(procedures_dept16$pp_lowsensitivity[which(procedures_dept16$ID_PATIENT==i)], procedures_dept16$prevalence[which(procedures_dept16$ID_PATIENT==i)])
+  dept16[i, "sensitivity high"] <- riskassessment(procedures_dept16$pp_highsensitivity[which(procedures_dept16$ID_PATIENT==i)], procedures_dept16$prevalence[which(procedures_dept16$ID_PATIENT==i)])
+}
+t.test(dept16$risk) #0.04716784; 95CI: 0.01190150 to 0.08243418
+mean(dept16$`sensitivity low`) #0.02204884
+mean(dept16$`sensitivity high`) #0.1691146
+
+#Department 17 Orthopedics
+procedures_dept17 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==17),]
+patients_dept17 <- as.character(names(table(procedures_dept17$ID_PATIENT)))
+dept17 <- data.frame(NULL)
+i=4
+for(i in patients_dept17){
+  dept17[i, "ID_PATIENT"] <- patients_dept17[i]
+  dept17[i, "risk"] <- riskassessment(procedures_dept17$pp_transmission[which(procedures_dept17$ID_PATIENT==i)], procedures_dept17$prevalence[which(procedures_dept17$ID_PATIENT==i)])
+  dept17[i, "sensitivity low"] <- riskassessment(procedures_dept17$pp_lowsensitivity[which(procedures_dept17$ID_PATIENT==i)], procedures_dept17$prevalence[which(procedures_dept17$ID_PATIENT==i)])
+  dept17[i, "sensitivity high"] <- riskassessment(procedures_dept17$pp_highsensitivity[which(procedures_dept17$ID_PATIENT==i)], procedures_dept17$prevalence[which(procedures_dept17$ID_PATIENT==i)])
+}
+t.test(dept17$risk) #0.01348326; 95CI: 0.01087421 to 0.01609231
+mean(dept17$`sensitivity low`) #0.006161129
+mean(dept17$`sensitivity high`) #0.05468872
+
+#Department 18 General surgery
+procedures_dept18 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==18),]
+patients_dept18 <- as.character(names(table(procedures_dept18$ID_PATIENT)))
+dept18 <- data.frame(NULL)
+i=4
+for(i in patients_dept18){
+  dept18[i, "ID_PATIENT"] <- patients_dept18[i]
+  dept18[i, "risk"] <- riskassessment(procedures_dept18$pp_transmission[which(procedures_dept18$ID_PATIENT==i)], procedures_dept18$prevalence[which(procedures_dept18$ID_PATIENT==i)])
+  dept18[i, "sensitivity low"] <- riskassessment(procedures_dept18$pp_lowsensitivity[which(procedures_dept18$ID_PATIENT==i)], procedures_dept18$prevalence[which(procedures_dept18$ID_PATIENT==i)])
+  dept18[i, "sensitivity high"] <- riskassessment(procedures_dept18$pp_highsensitivity[which(procedures_dept18$ID_PATIENT==i)], procedures_dept18$prevalence[which(procedures_dept18$ID_PATIENT==i)])
+}
+t.test(dept18$risk) #0.002773387; 95CI: 0.002031071 to 0.003515702
+mean(dept18$`sensitivity low`) #0.001262401
+mean(dept18$`sensitivity high`) #0.0115007
+
+#Department 19 ER building
+procedures_dept19 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==19),]
+patients_dept19 <- as.character(names(table(procedures_dept19$ID_PATIENT)))
+dept19 <- data.frame(NULL)
+i=4
+for(i in patients_dept19){
+  dept19[i, "ID_PATIENT"] <- patients_dept19[i]
+  dept19[i, "risk"] <- riskassessment(procedures_dept19$pp_transmission[which(procedures_dept19$ID_PATIENT==i)], procedures_dept19$prevalence[which(procedures_dept19$ID_PATIENT==i)])
+  dept19[i, "sensitivity low"] <- riskassessment(procedures_dept19$pp_lowsensitivity[which(procedures_dept19$ID_PATIENT==i)], procedures_dept19$prevalence[which(procedures_dept19$ID_PATIENT==i)])
+  dept19[i, "sensitivity high"] <- riskassessment(procedures_dept19$pp_highsensitivity[which(procedures_dept19$ID_PATIENT==i)], procedures_dept19$prevalence[which(procedures_dept19$ID_PATIENT==i)])
+}
+t.test(dept19$risk) #0.005607895; 95CI: 0.003163352 to 0.008052437
+mean(dept19$`sensitivity low`) #0.002573052
+mean(dept19$`sensitivity high`) #0.02233329
+
+#Department 20 Neuro SURGERY
+procedures_dept20 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==20),]
+patients_dept20 <- as.character(names(table(procedures_dept20$ID_PATIENT)))
+dept20 <- data.frame(NULL)
+i=4
+for(i in patients_dept20){
+  dept20[i, "ID_PATIENT"] <- patients_dept20[i]
+  dept20[i, "risk"] <- riskassessment(procedures_dept20$pp_transmission[which(procedures_dept20$ID_PATIENT==i)], procedures_dept20$prevalence[which(procedures_dept20$ID_PATIENT==i)])
+  dept20[i, "sensitivity low"] <- riskassessment(procedures_dept20$pp_lowsensitivity[which(procedures_dept20$ID_PATIENT==i)], procedures_dept20$prevalence[which(procedures_dept20$ID_PATIENT==i)])
+  dept20[i, "sensitivity high"] <- riskassessment(procedures_dept20$pp_highsensitivity[which(procedures_dept20$ID_PATIENT==i)], procedures_dept20$prevalence[which(procedures_dept20$ID_PATIENT==i)])
+}
+t.test(dept20$risk) #0.1042205; 95CI: -0.2351156  to 0.4435566
+mean(dept20$`sensitivity low`) #0.05062673
+mean(dept20$`sensitivity high`) #0.3092883
+
+#Department 21 Urosurgery
+procedures_dept21 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==21),]
+patients_dept21 <- as.character(names(table(procedures_dept21$ID_PATIENT)))
+dept21 <- data.frame(NULL)
+i=4
+for(i in patients_dept21){
+  dept21[i, "ID_PATIENT"] <- patients_dept21[i]
+  dept21[i, "risk"] <- riskassessment(procedures_dept21$pp_transmission[which(procedures_dept21$ID_PATIENT==i)], procedures_dept21$prevalence[which(procedures_dept21$ID_PATIENT==i)])
+  dept21[i, "sensitivity low"] <- riskassessment(procedures_dept21$pp_lowsensitivity[which(procedures_dept21$ID_PATIENT==i)], procedures_dept21$prevalence[which(procedures_dept21$ID_PATIENT==i)])
+  dept21[i, "sensitivity high"] <- riskassessment(procedures_dept21$pp_highsensitivity[which(procedures_dept21$ID_PATIENT==i)], procedures_dept21$prevalence[which(procedures_dept21$ID_PATIENT==i)])
+}
+t.test(dept21$risk) #0.03909008; 95CI: -0.005624815 to 0.083804983
+mean(dept21$`sensitivity low`) #0.01800886
+mean(dept21$`sensitivity high`) #0.1514273
+ 
+#Department 22 Burn
+#no procedures done in dept 22
+
+#Department 23 ENT
+#no procedures done in dept 23
+
+#Department 24 Plastic surgery
+procedures_dept24 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==24),]
+patients_dept24 <- as.character(names(table(procedures_dept24$ID_PATIENT)))
+dept24 <- data.frame(NULL)
+i=4
+for(i in patients_dept24){
+  dept24[i, "ID_PATIENT"] <- patients_dept24[i]
+  dept24[i, "risk"] <- riskassessment(procedures_dept24$pp_transmission[which(procedures_dept24$ID_PATIENT==i)], procedures_dept24$prevalence[which(procedures_dept24$ID_PATIENT==i)])
+  dept24[i, "sensitivity low"] <- riskassessment(procedures_dept24$pp_lowsensitivity[which(procedures_dept24$ID_PATIENT==i)], procedures_dept24$prevalence[which(procedures_dept24$ID_PATIENT==i)])
+  dept24[i, "sensitivity high"] <- riskassessment(procedures_dept24$pp_highsensitivity[which(procedures_dept24$ID_PATIENT==i)], procedures_dept24$prevalence[which(procedures_dept24$ID_PATIENT==i)])
+}
+t.test(dept24$risk) #0.00375843; 95CI: 0.003003014 to 0.004513845
+mean(dept24$`sensitivity low`) #0.001709859
+mean(dept24$`sensitivity high`) #0.01564013
+
+#Department 25 OR
+procedures_dept25 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==25),]
+patients_dept25 <- as.character(names(table(procedures_dept25$ID_PATIENT)))
+dept25 <- data.frame(NULL)
+i=4
+for(i in patients_dept25){
+  dept25[i, "ID_PATIENT"] <- patients_dept25[i]
+  dept25[i, "risk"] <- riskassessment(procedures_dept25$pp_transmission[which(procedures_dept25$ID_PATIENT==i)], procedures_dept25$prevalence[which(procedures_dept25$ID_PATIENT==i)])
+  dept25[i, "sensitivity low"] <- riskassessment(procedures_dept25$pp_lowsensitivity[which(procedures_dept25$ID_PATIENT==i)], procedures_dept25$prevalence[which(procedures_dept25$ID_PATIENT==i)])
+  dept25[i, "sensitivity high"] <- riskassessment(procedures_dept25$pp_highsensitivity[which(procedures_dept25$ID_PATIENT==i)], procedures_dept25$prevalence[which(procedures_dept25$ID_PATIENT==i)])
+}
+t.test(dept25$risk) #0.003123103; 95CI: 0.002897478 to 0.003348727
+mean(dept25$`sensitivity low`) #0.001420508
+mean(dept25$`sensitivity high`) #0.01301084 
+
+#Department 26 Radiology
+procedures_dept26 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==26),]
+patients_dept26 <- as.character(names(table(procedures_dept26$ID_PATIENT)))
+dept26 <- data.frame(NULL)
+i=4
+for(i in patients_dept26){
+  dept26[i, "ID_PATIENT"] <- patients_dept26[i]
+  dept26[i, "risk"] <- riskassessment(procedures_dept26$pp_transmission[which(procedures_dept26$ID_PATIENT==i)], procedures_dept26$prevalence[which(procedures_dept26$ID_PATIENT==i)])
+  dept26[i, "sensitivity low"] <- riskassessment(procedures_dept26$pp_lowsensitivity[which(procedures_dept26$ID_PATIENT==i)], procedures_dept26$prevalence[which(procedures_dept26$ID_PATIENT==i)])
+  dept26[i, "sensitivity high"] <- riskassessment(procedures_dept26$pp_highsensitivity[which(procedures_dept26$ID_PATIENT==i)], procedures_dept26$prevalence[which(procedures_dept26$ID_PATIENT==i)])
+}
+t.test(dept26$risk) #0.004108808; 95CI: 0.003251049 to 0.004966568
+mean(dept26$`sensitivity low`) #0.001868352
+mean(dept26$`sensitivity high`) #0.01715149
+
+#Department 27 Clinical Pathology
+procedures_dept27 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==27),]
+patients_dept27 <- as.character(names(table(procedures_dept27$ID_PATIENT)))
+dept27 <- data.frame(NULL)
+i=4
+for(i in patients_dept27){
+  dept27[i, "ID_PATIENT"] <- patients_dept27[i]
+  dept27[i, "risk"] <- riskassessment(procedures_dept27$pp_transmission[which(procedures_dept27$ID_PATIENT==i)], procedures_dept27$prevalence[which(procedures_dept27$ID_PATIENT==i)])
+  dept27[i, "sensitivity low"] <- riskassessment(procedures_dept27$pp_lowsensitivity[which(procedures_dept27$ID_PATIENT==i)], procedures_dept27$prevalence[which(procedures_dept27$ID_PATIENT==i)])
+  dept27[i, "sensitivity high"] <- riskassessment(procedures_dept27$pp_highsensitivity[which(procedures_dept27$ID_PATIENT==i)], procedures_dept27$prevalence[which(procedures_dept27$ID_PATIENT==i)])
+}
+t.test(dept27$risk) #0.0004856509; 95CI: 0.0004759070 to 0.0004953948
+mean(dept27$`sensitivity low`) #0.0002206811
+mean(dept27$`sensitivity high`) #0.002030963
+
+#Department 28 Endoscopy
+procedures_dept28 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==28),]
+patients_dept28 <- as.character(names(table(procedures_dept28$ID_PATIENT)))
+dept28 <- data.frame(NULL)
+i=4
+for(i in patients_dept28){
+  dept28[i, "ID_PATIENT"] <- patients_dept28[i]
+  dept28[i, "risk"] <- riskassessment(procedures_dept28$pp_transmission[which(procedures_dept28$ID_PATIENT==i)], procedures_dept28$prevalence[which(procedures_dept28$ID_PATIENT==i)])
+  dept28[i, "sensitivity low"] <- riskassessment(procedures_dept28$pp_lowsensitivity[which(procedures_dept28$ID_PATIENT==i)], procedures_dept28$prevalence[which(procedures_dept28$ID_PATIENT==i)])
+  dept28[i, "sensitivity high"] <- riskassessment(procedures_dept28$pp_highsensitivity[which(procedures_dept28$ID_PATIENT==i)], procedures_dept28$prevalence[which(procedures_dept28$ID_PATIENT==i)])
+}
+t.test(dept28$risk) #0.004290956; 95CI: 0.003079381 to 0.005502531
+mean(dept28$`sensitivity low`) #0.001951024
+mean(dept28$`sensitivity high`) #0.01791235
+ 
+#Department 29 Physical medicine
+procedures_dept29 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==29),]
+patients_dept29 <- as.character(names(table(procedures_dept29$ID_PATIENT)))
+dept29 <- data.frame(NULL)
+i=4
+for(i in patients_dept29){
+  dept29[i, "ID_PATIENT"] <- patients_dept29[i]
+  dept29[i, "risk"] <- riskassessment(procedures_dept29$pp_transmission[which(procedures_dept29$ID_PATIENT==i)], procedures_dept29$prevalence[which(procedures_dept29$ID_PATIENT==i)])
+  dept29[i, "sensitivity low"] <- riskassessment(procedures_dept29$pp_lowsensitivity[which(procedures_dept29$ID_PATIENT==i)], procedures_dept29$prevalence[which(procedures_dept29$ID_PATIENT==i)])
+  dept29[i, "sensitivity high"] <- riskassessment(procedures_dept29$pp_highsensitivity[which(procedures_dept29$ID_PATIENT==i)], procedures_dept29$prevalence[which(procedures_dept29$ID_PATIENT==i)])
+}
+t.test(dept29$risk) #0.004290956; 95CI: 0.003079381 to 0.005502531
+mean(dept29$`sensitivity low`) #0.001951024
+mean(dept29$`sensitivity high`) #0.01791235
+
+#Department 30 ER
+procedures_dept30 <- mpatient_procedures[which(mpatient_procedures$DEPARTMENT==30),]
+patients_dept30 <- as.character(names(table(procedures_dept30$ID_PATIENT)))
+dept30 <- data.frame(NULL)
+i=4
+for(i in patients_dept30){
+  dept30[i, "ID_PATIENT"] <- patients_dept30[i]
+  dept30[i, "risk"] <- riskassessment(procedures_dept30$pp_transmission[which(procedures_dept30$ID_PATIENT==i)], procedures_dept30$prevalence[which(procedures_dept30$ID_PATIENT==i)])
+  dept30[i, "sensitivity low"] <- riskassessment(procedures_dept30$pp_lowsensitivity[which(procedures_dept30$ID_PATIENT==i)], procedures_dept30$prevalence[which(procedures_dept30$ID_PATIENT==i)])
+  dept30[i, "sensitivity high"] <- riskassessment(procedures_dept30$pp_highsensitivity[which(procedures_dept30$ID_PATIENT==i)], procedures_dept30$prevalence[which(procedures_dept30$ID_PATIENT==i)])
+}
+t.test(dept30$risk) #0.004617474; 95CI: 0.004271224 to 0.004963723
+mean(dept30$`sensitivity low`) #0.00210084
+mean(dept30$`sensitivity high`) #0.01919455
+
+#Compiles risk in excel
+library(readxl)
+department_specific_risk <- read_excel("C:/Users/Jung/Documents/department specific risk.xlsx", 
+                                       sheet = "Sheet2", col_types = c("text", "numeric", "numeric", "numeric", "numeric", "numeric"))
+#Label departments
+department_specific_risk$Departments <- factor(department_specific_risk$Departments,
+                                               levels = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 
+                                                          23, 24, 25, 26, 27,28,29,30), 
+                                               labels = c("GIT and endoscopy 1&2", "Endocrinology", "Immunology and allergy",
+                                                          "Hematology", "Rheumatology", "Geriatric", "Chest", "Nephrology", "Cardiology",
+                                                          "Cardiac catheterization", "Neurology", "Tropical", "Dermatology", "Ophthalmology", 
+                                                          "Dialysis", "ICU", "Orthopedics", "General surgery", "ER building", "Neuro surgery",
+                                                          "Urosurgery", "Burn", "ENT", "Plastic surgery", "OR", "Radiology", "Clinical pathology",
+                                                          "Endoscopy", "Physical medicine", "ER"))
+
+#plot
 library(ggplot2)
-ggplot(dept_mean_plot2, aes(x=reorder(departments, mean), y=mean))+
+ggplot(department_specific_risk[which(department_specific_risk$Risk>0),], aes(x=reorder(Departments, Risk), y=round(Risk*100,2)))+
   geom_bar(stat = "identity", position = "dodge")+coord_flip() + 
-  geom_errorbar(aes(ymin=CILow, ymax=CIUpper), width = 0.25)+
-  geom_text(aes(y=mean, label=mean, hjust=-1.5, vjust=-0.2), size=2.5)+
+  geom_errorbar(aes(ymin=CIL*100, ymax=CIU*100), width = 0.25)+
+  geom_text(aes(y=round(Risk*100,2), label=round(Risk*100,2), hjust=-0.6, vjust=-0.3), size=3)+
   theme(plot.subtitle = element_text(vjust = 1), 
         plot.caption = element_text(vjust = 1), 
         axis.title = element_text(face = "bold"), 
         plot.title = element_text(size = 15, 
                                   face = "bold", hjust = 0.5)) +
-  labs(title = "Average patient risk in departments", x = "Departments", y = "Average risk (%)")+
-  labs(caption = "Kruskal-Wallis test: P-value < 0.0001")
+  labs(title = "Department-specific risk", x = "Departments", y = "Average risk (%)")+
+  labs(caption = "Kruskal-Wallis test: P-value < 0.0001") + theme(axis.text = element_text(size = 10.5)) + theme(axis.title = element_text(size = 12))
+
+
+##### HOSPITAL-SPECIFIC RISK ####
+## melting patient with procedures
+patient_procedures <- Patient.Invasive.Procedure[, c("ID_PATIENTINVASIVEPROC", "ID_PATIENT", "INTRAVENOUS",
+                                                     "SUTURES", "BLOOD_TRANSFUSION", "BLOOD_SAMPLE", "INJECTION",
+                                                     "ENDOSCOPY", "GASTRIC_LAVAGE", "IUD_INSERTION", "CARDIAC_CATHETER",
+                                                     "DIALYSIS", "WOUND_DRESSING", "BLOODGLUCOSE", "ENDOTRACHEALINTU",
+                                                     "DRAINAGECATHETER")]
+#rename columns
+colnames(patient_procedures) <- c("ID_PATIENTINVASIVEPROC", "ID_PATIENT", "IV catheter", "stitches", "blood transfusion", 
+                                  "blood sample", "injection", "endoscopy", "gastric lavage", "IUD insertion", "cardiac catheter",
+                                  "hemodialysis", "wound dressing", "blood glucose", "endotracheal intubation",
+                                  "drainage catheter")
+
+library(reshape2)
+mpatient_procedures <- melt(patient_procedures, id=c("ID_PATIENT", "ID_PATIENTINVASIVEPROC"), na.rm = T)
+colnames(pp_risk_df)[1] <- "procedures"
+colnames(mpatient_procedures)[3] <- "procedures"
+mpatient_procedures <- merge(mpatient_procedures, pp_risk_df, by="procedures")
+
+#delete value column in mpatient_procedure
+mpatient_procedures$value <- NULL
+
+#Hospital and HCV RNA prevalence df
+prevalence_hosp <- data.frame(names(table(Hosp_Trajectory_HCV_S$PLACE)))
+names(prevalence_hosp) <- c("PLACE_PROCEDURE")
+prevalence_hosp$prevalence <- hosp.traj.RNA$positive/hosp.traj.RNA$total
+
+#merge hospital and prevalence into df
+procID_hosp <- Patient.Invasive.Procedure[, c("ID_PATIENTINVASIVEPROC", "PLACE_PROCEDURE")] #df with just procedure ID and hosp
+procID_hosp <- procID_hosp[which(procID_hosp$PLACE_PROCEDURE==1 | procID_hosp$PLACE_PROCEDURE==2),]
+hops_patient_procedures <- merge(mpatient_procedures, procID_hosp, by="ID_PATIENTINVASIVEPROC")
+hops_patient_procedures <- merge(hops_patient_procedures, prevalence_hosp, by="PLACE_PROCEDURE")
+
+## Calculate risk
+#Surgery hospital
+procedures_hosp1 <- hops_patient_procedures[which(hops_patient_procedures$PLACE_PROCEDURE==1),]
+patients_hosp1 <- as.character(names(table(procedures_hosp1$ID_PATIENT)))
+hosp1 <- data.frame(NULL)
+i=4
+for(i in patients_hosp1){
+  hosp1[i, "ID_PATIENT"] <- patients_hosp1[i]
+  hosp1[i, "risk"] <- riskassessment(procedures_hosp1$pp_transmission[which(procedures_hosp1$ID_PATIENT==i)], procedures_hosp1$prevalence[which(procedures_hosp1$ID_PATIENT==i)])
+  hosp1[i, "sensitivity low"] <- riskassessment(procedures_hosp1$pp_lowsensitivity[which(procedures_hosp1$ID_PATIENT==i)], procedures_hosp1$prevalence[which(procedures_hosp1$ID_PATIENT==i)])
+  hosp1[i, "sensitivity high"] <- riskassessment(procedures_hosp1$pp_highsensitivity[which(procedures_hosp1$ID_PATIENT==i)], procedures_hosp1$prevalence[which(procedures_hosp1$ID_PATIENT==i)])
+}
+t.test(hosp1$risk) #0.01237849; 95CI: 0.01045003 to 0.01430695
+mean(hosp1$`sensitivity low`) #0.00567608
+mean(hosp1$`sensitivity high`) #0.04939596
+
+#Int med hospital
+procedures_hosp2 <- hops_patient_procedures[which(hops_patient_procedures$PLACE_PROCEDURE==2),]
+patients_hosp2 <- as.character(names(table(procedures_hosp2$ID_PATIENT)))
+hosp2 <- data.frame(NULL)
+i=4
+for(i in patients_hosp2){
+  hosp2[i, "ID_PATIENT"] <- patients_hosp2[i]
+  hosp2[i, "risk"] <- riskassessment(procedures_hosp2$pp_transmission[which(procedures_hosp2$ID_PATIENT==i)], procedures_hosp2$prevalence[which(procedures_hosp2$ID_PATIENT==i)])
+  hosp2[i, "sensitivity low"] <- riskassessment(procedures_hosp2$pp_lowsensitivity[which(procedures_hosp2$ID_PATIENT==i)], procedures_hosp2$prevalence[which(procedures_hosp2$ID_PATIENT==i)])
+  hosp2[i, "sensitivity high"] <- riskassessment(procedures_hosp2$pp_highsensitivity[which(procedures_hosp2$ID_PATIENT==i)], procedures_hosp2$prevalence[which(procedures_hosp2$ID_PATIENT==i)])
+}
+t.test(hosp2$risk) #0.04460613; 95CI: 0.03739585 to 0.05181641
+mean(hosp2$`sensitivity low`) #0.02093043
+mean(hosp2$`sensitivity high`) #0.1584101
+
+#Compiled in excel
+library(readxl)
+hospital_specific_risk <- read_excel("C:/Users/Jung/Documents/department specific risk.xlsx", 
+                                     sheet = "Hospitals", col_types = c("text", "numeric", "numeric", "numeric", "numeric", "numeric"))
+t.test(hosp1$risk, hosp2$risk) #p-value <0.00001
+
+#plot
+library(ggplot2)
+ggplot(hospital_specific_risk, aes(x=reorder(Hospitals, -Risk), y=round(Risk*100,2)))+
+  geom_bar(stat = "identity", position = "dodge")+ 
+  geom_errorbar(aes(ymin=CIL*100, ymax=CIU*100), width = 0.15)+
+  geom_text(aes(y=round(Risk*100,2), label=round(Risk*100,2), hjust=-1.5, vjust=-0.5), size=4)+
+  theme(plot.subtitle = element_text(vjust = 1), 
+        plot.caption = element_text(vjust = 1), 
+        axis.title = element_text(face = "bold"), 
+        plot.title = element_text(size = 15, 
+                                  face = "bold", hjust = 0.5)) +
+  labs(title = "Hospital-specific risk", x = "Hospitals", y = "Average risk (%)")+
+  labs(caption = "Two-sample t-test: P-value < 0.0001") + theme(axis.title = element_text(size = 13), 
+                                                                axis.text = element_text(size = 12))
