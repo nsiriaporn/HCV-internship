@@ -1,4 +1,6 @@
 # HCV-internship
+2/2018 - 7/2018
+
 Codes for my internship project
 
 IMMOHeTHep (Inestigative Mathematical Modeling of Hospital Transmission of Hepatits C)
